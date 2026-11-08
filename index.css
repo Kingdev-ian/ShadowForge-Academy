@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --obsidian: #07090E;
+  --limestone: #E8E6E1;
+  --amber: #FFC857;
+  --cyan: #00E5FF;
+  --danger: #FF334B;
+}
+
+body {
+  background-color: var(--obsidian);
+  color: var(--limestone);
+  font-family: 'JetBrains Mono', monospace;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--amber);
+  color: var(--obsidian);
+}
