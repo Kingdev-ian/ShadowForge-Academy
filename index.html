@@ -1,0 +1,3447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- Cache-busting: force the browser to always revalidate this document so a
+       stale copy of index.html (e.g. an old build that referenced /src/main.jsx)
+       can never be served from cache and trigger the "import outside module"
+       Babel error again. -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>ShadowForge Academy — Citadel Engine</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400;500;700&display=swap"
+    rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --obsidian: #07090E;
+      --limestone: #E8E6E1;
+      --amber: #FFC857;
+      --cyan: #00E5FF;
+      --danger: #FF334B;
+      --mono: "JetBrains Mono", monospace;
+      --serif: "Cinzel", serif;
+      --garamond: "Cormorant Garamond", serif;
+    }
+
+    * {
+      -webkit-font-smoothing: antialiased;
+      box-sizing: border-box;
+      touch-action: manipulation;
+    }
+
+    body,
+    html {
+      background: var(--obsidian);
+      color: var(--limestone);
+      font-family: var(--mono);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .mono {
+      font-family: var(--mono);
+    }
+
+    .serif {
+      font-family: var(--serif);
+    }
+
+    .garamond {
+      font-family: var(--garamond);
+    }
+
+    ::selection {
+      background: var(--amber);
+      color: var(--obsidian);
+    }
+
+    @keyframes spark-pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+        filter: drop-shadow(0 0 6px #FFC857);
+      }
+
+      50% {
+        transform: scale(1.35);
+        opacity: 0.85;
+        filter: drop-shadow(0 0 16px rgba(255, 200, 87, 0.85));
+      }
+    }
+
+    @keyframes starburst-spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes halo-breathe {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 0.95;
+      }
+
+      50% {
+        transform: scale(1.08);
+        opacity: 0.6;
+      }
+    }
+
+    @keyframes aura-corona {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 0.25;
+      }
+
+      50% {
+        transform: scale(1.15);
+        opacity: 0.12;
+      }
+    }
+
+    @keyframes edge-crawl {
+      0% {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+
+      15% {
+        opacity: 1;
+      }
+
+      85% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-140%);
+        opacity: 0;
+      }
+    }
+
+    @keyframes seam-pulse {
+
+      0%,
+      100% {
+        opacity: 0.95;
+        box-shadow: 0 0 16px rgba(255, 200, 87, 0.5);
+      }
+
+      50% {
+        opacity: 0.5;
+        box-shadow: 0 0 8px rgba(255, 200, 87, 0.2);
+      }
+    }
+
+    @keyframes pulse-cyan {
+
+      0%,
+      100% {
+        opacity: 0.9;
+        filter: drop-shadow(0 0 6px #00E5FF);
+      }
+
+      50% {
+        opacity: 0.4;
+        filter: drop-shadow(0 0 16px rgba(0, 229, 255, 0.7));
+      }
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+</head>
+
+<body class="selection:bg-[#FFC857] selection:text-black">
+  <div id="root"></div>
+
+  <!-- Surface any Babel/JS compile or runtime error instead of a silent blank screen -->
+  <div id="boot-error"
+    style="display:none;position:fixed;inset:0;z-index:9999;background:#07090E;color:#FF6B6B;font-family:monospace;font-size:12px;padding:24px;overflow:auto;white-space:pre-wrap;">
+  </div>
+  <noscript style="color:#E8E6E1;font-family:monospace;padding:24px;display:block;">This app requires
+    JavaScript.</noscript>
+  <script>
+    (function () {
+      function showBootError(msg) {
+        var el = document.getElementById('boot-error');
+        if (el) { el.style.display = 'block'; el.textContent = 'SHADOWFORGE BOOT ERROR\n\n' + msg; }
+        console.error('[ShadowForge boot error]', msg);
+      }
+      window.addEventListener('error', function (e) {
+        // Only surface errors that prevent the app from mounting
+        if (!document.getElementById('root') || document.getElementById('root').children.length === 0) {
+          showBootError((e.error && e.error.stack) || e.message || String(e));
+        }
+      });
+      // Verify the CDNs actually loaded; give a clear message if not.
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          if (typeof React === 'undefined' || typeof ReactDOM === 'undefined' || typeof Babel === 'undefined') {
+            showBootError('A required CDN script failed to load (React, ReactDOM, or Babel).\nCheck your network / disable blockers for unpkg.com and cdn.tailwindcss.com.');
+            return;
+          }
+          if (document.getElementById('root') && document.getElementById('root').children.length === 0) {
+            showBootError('React mounted nothing. Most often this is a Babel/JSX compile error — open the DevTools Console for the exact line.');
+          }
+        }, 1500);
+      });
+    })();
+  </script>
+
+  <!--
+    NOTE: This block is intentionally NOT a module (plain <script type="text/babel">).
+    Babel/standalone compiles it to a classic script, so `import` / `export` statements
+    are NOT allowed here. React, ReactDOM and Babel are already loaded globally from the
+    CDN <script> tags in <head>; everything below relies on those globals + the hooks
+    destructured from `React` on the next line.
+  -->
+  <!--
+    SHARED PROCEDURAL SYNTHESIZER SOURCE.
+    A plain-text (NOT executable) template string that holds the body of the
+    Citadel's Web Audio engine. It is injected below into index.html's inline
+    scope *and* is read at runtime by src/lib/forge-audio.js, so the src/
+    simulation and this document share ONE synth implementation — no audio
+    files, no duplicated behaviour, 0ms Web Audio latency in both places.
+  -->
+  <script id="citadel-audio-src" type="text/plain">
+    {
+      constructor() { this.ctx = null; this.master = null; }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContext) return null;
+          this.ctx = new AudioContext();
+          this.master = this.ctx.createGain();
+          this.master.gain.value = 1;
+          this.master.connect(this.ctx.destination);
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        return this.ctx;
+      }
+      // Shared envelope helper: one oscillator + gain ramp -> master bus.
+      tone(type, from, to, dur, peak, delay) {
+        const ctx = this.init();
+        if (!ctx) return;
+        const t0 = ctx.currentTime + (delay || 0);
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(from, t0);
+        if (to !== from) osc.frequency.exponentialRampToValueAtTime(Math.max(to, 1), t0 + dur);
+        gain.gain.setValueAtTime(peak, t0);
+        gain.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+        osc.connect(gain);
+        gain.connect(this.master || ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + dur + 0.02);
+      }
+      // Filtered noise burst — used for pneumatics and metal-on-metal harmonics.
+      noise(dur, peak, filterType, freqFrom, freqTo, delay) {
+        const ctx = this.init();
+        if (!ctx) return;
+        const t0 = ctx.currentTime + (delay || 0);
+        const frames = Math.max(1, Math.floor(ctx.sampleRate * dur));
+        const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < frames; i++) data[i] = Math.random() * 2 - 1;
+        const src = ctx.createBufferSource();
+        src.buffer = buffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = filterType || 'bandpass';
+        filter.frequency.setValueAtTime(freqFrom, t0);
+        filter.frequency.exponentialRampToValueAtTime(Math.max(freqTo, 20), t0 + dur);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(peak, t0);
+        gain.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+        src.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.master || ctx.destination);
+        src.start(t0);
+        src.stop(t0 + dur + 0.02);
+      }
+      // AIR-LOCK: pneumatic hatch release (saw sweep + escaping air).
+      playPneumatic() {
+        this.tone('sawtooth', 130, 30, 0.45, 0.3);
+        this.noise(0.7, 0.16, 'highpass', 1800, 400, 0.02);
+        this.tone('square', 62, 26, 0.35, 0.1, 0.04);
+      }
+      // BLADE: monomolecular severing slice.
+      playSlice() {
+        this.tone('triangle', 1400, 160, 0.2, 0.25);
+        this.noise(0.22, 0.1, 'highpass', 5200, 1400, 0);
+        this.tone('sine', 420, 90, 0.3, 0.12, 0.05);
+      }
+      playClick() {
+        this.tone('sine', 900, 900, 0.04, 0.06);
+      }
+      // ERROR: two-tone alarm.
+      playAlarm() {
+        this.tone('square', 100, 100, 0.25, 0.2);
+        this.tone('square', 74, 74, 0.28, 0.16, 0.14);
+      }
+      // SPARK: the gold 1px line "lighting the forge".
+      playSpark() {
+        this.tone('sine', 2400, 520, 0.22, 0.07);
+        this.noise(0.18, 0.05, 'bandpass', 3200, 900, 0);
+      }
+      // SUCCESS: amber weld resonance.
+      playWeld() {
+        this.tone('sine', 196, 196, 1.1, 0.16);
+        this.tone('sine', 294, 294, 0.9, 0.1, 0.03);
+        this.tone('triangle', 587, 587, 0.6, 0.05, 0.06);
+        this.noise(0.5, 0.06, 'bandpass', 2400, 600, 0);
+      }
+      // SEAL: air-lock closing / node reset.
+      playSeal() {
+        this.noise(0.55, 0.14, 'lowpass', 900, 120, 0);
+        this.tone('sawtooth', 90, 18, 0.6, 0.18, 0.02);
+      }
+      // LOCKOUT: Archivist denial sting.
+      playLockout() {
+        this.tone('square', 220, 200, 0.18, 0.14);
+        this.tone('square', 110, 100, 0.55, 0.18, 0.2);
+        this.noise(0.9, 0.07, 'lowpass', 600, 80, 0.1);
+      }
+      // SURGE: the 15s aftershock — sub-bass drop + shearing metal.
+      playSurge() {
+        this.tone('sawtooth', 180, 28, 0.9, 0.28);
+        this.tone('square', 58, 22, 1.2, 0.16, 0.06);
+        this.noise(1.0, 0.14, 'lowpass', 1200, 90, 0);
+      }
+      // FUSE: molten-gold weld on the secondary girder (trial victory).
+      playFuse() {
+        this.tone('sine', 147, 196, 0.9, 0.16);
+        this.tone('triangle', 392, 392, 0.7, 0.07, 0.04);
+        this.noise(0.7, 0.08, 'bandpass', 2800, 700, 0);
+        this.playSpark();
+      }
+      stopAll() {}
+    },
+  </script>
+
+  <script type="text/babel" data-presets="react">
+    // Globals from the CDN tags in <head> (no imports needed / allowed here).
+    const {
+      useState,
+      useEffect,
+      useMemo,
+      useRef,
+      useCallback
+    } = React;
+    // YOUR CLOUDFLARE R2 MASTER STREAM URLS
+    const R2_INTRO_URL = "https://pub-fd6c0b6e45ed4d89ba69d5c71d40932f.r2.dev/intro-crf28.mp4";
+    const R2_ACT1_URL = "";
+
+    // --- PROCEDURAL 0ms SYNTHESIZER ---
+    // Same implementation as src/lib/forge-audio.js: the class body lives once,
+    // in the <script id="citadel-audio-src"> block above, and is compiled here.
+    // No audio files — every sound is synthesized at call time (0ms latency).
+    class WebAudioSynth {
+  constructor() { this.ctx = null; this.master = null; }
+  init() {
+    if (!this.ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      this.ctx = new AC();
+      this.master = this.ctx.createGain();
+      this.master.gain.value = 1;
+      this.master.connect(this.ctx.destination);
+    }
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    return this.ctx;
+  }
+  tone(type, from, to, dur, peak, delay) {
+    const ctx = this.init();
+    if (!ctx) return;
+    const t0 = ctx.currentTime + (delay || 0);
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(from, t0);
+    if (to !== from) osc.frequency.exponentialRampToValueAtTime(Math.max(to, 1), t0 + dur);
+    gain.gain.setValueAtTime(peak, t0);
+    gain.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+    osc.connect(gain);
+    gain.connect(this.master);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.02);
+  }
+  noise(dur, peak, filterType, freqFrom, freqTo, delay) {
+    const ctx = this.init();
+    if (!ctx) return;
+    const t0 = ctx.currentTime + (delay || 0);
+    const frames = Math.max(1, Math.floor(ctx.sampleRate * dur));
+    const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < frames; i++) data[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = filterType || 'bandpass';
+    filter.frequency.setValueAtTime(freqFrom, t0);
+    filter.frequency.exponentialRampToValueAtTime(Math.max(freqTo, 20), t0 + dur);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(peak, t0);
+    gain.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.master);
+    src.start(t0);
+    src.stop(t0 + dur + 0.02);
+  }
+  playPneumatic() {
+    this.tone('sawtooth', 130, 30, 0.45, 0.3);
+    this.noise(0.7, 0.16, 'highpass', 1800, 400, 0.02);
+    this.tone('square', 62, 26, 0.35, 0.1, 0.04);
+  }
+  playSlice() {
+    this.tone('triangle', 1400, 160, 0.2, 0.25);
+    this.noise(0.22, 0.1, 'highpass', 5200, 1400, 0);
+    this.tone('sine', 420, 90, 0.3, 0.12, 0.05);
+  }
+  playClick() { this.tone('sine', 900, 900, 0.04, 0.06); }
+  playAlarm() {
+    this.tone('square', 100, 100, 0.25, 0.2);
+    this.tone('square', 74, 74, 0.28, 0.16, 0.14);
+  }
+  playSpark() {
+    this.tone('sine', 2400, 520, 0.22, 0.07);
+    this.noise(0.18, 0.05, 'bandpass', 3200, 900, 0);
+  }
+  playWeld() {
+    this.tone('sine', 196, 196, 1.1, 0.16);
+    this.tone('sine', 294, 294, 0.9, 0.1, 0.03);
+    this.tone('triangle', 587, 587, 0.6, 0.05, 0.06);
+    this.noise(0.5, 0.06, 'bandpass', 2400, 600, 0);
+  }
+  playSeal() {
+    this.noise(0.55, 0.14, 'lowpass', 900, 120, 0);
+    this.tone('sawtooth', 90, 18, 0.6, 0.18, 0.02);
+  }
+  playLockout() {
+    this.tone('square', 220, 200, 0.18, 0.14);
+    this.tone('square', 110, 100, 0.55, 0.18, 0.2);
+    this.noise(0.9, 0.07, 'lowpass', 600, 80, 0.1);
+  }
+playFuse(){this.init();if(!this.ctx)return;const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type="sawtooth";o.frequency.setValueAtTime(320,this.ctx.currentTime);o.frequency.exponentialRampToValueAtTime(80,this.ctx.currentTime+0.35);g.gain.setValueAtTime(0.25,this.ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,this.ctx.currentTime+0.35);o.connect(g);g.connect(this.ctx.destination);o.start();o.stop(this.ctx.currentTime+0.35);}playSurge(){this.tone("sawtooth",180,28,0.9,0.28);this.tone("square",58,22,1.2,0.16,0.06);this.noise(1.0,0.14,"lowpass",1200,90,0);}}
+const audio = new WebAudioSynth();
+
+    // =======================================================================
+    // "LIGHTING THE FORGE" LOADER (replaces every circular spinner)
+    // =======================================================================
+    // A 1px horizontal line expands across the void, then a gold spark
+    // (#FFC857) pulses at its centre. Pure CSS, no assets, no JS timers.
+    function ForgeLoader({ label = "LIGHTING THE FORGE" }) {
+      return (
+        <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center bg-[#07090E]">
+          <div className="relative w-[68vw] max-w-[320px] md:max-w-[420px] h-[1px]">
+            <div className="absolute inset-0 bg-[#E8E6E1]/10" />
+            <div
+              className="absolute inset-y-0 left-0 right-0 bg-[#FFC857]"
+              style={{
+                transformOrigin: "center",
+                boxShadow: "0 0 8px rgba(255,200,87,0.75)",
+                animation: "forgeLineExpand 1.35s cubic-bezier(0.22,0.61,0.36,1) infinite alternate"
+              }}
+            />
+            <div
+              className="absolute left-1/2 top-1/2 w-[3px] h-[3px] -translate-x-1/2 -translate-y-1/2 bg-[#FFC857]"
+              style={{
+                borderRadius: "9999px",
+                animation: "forgeSparkPulse 1.35s ease-in-out infinite"
+              }}
+            />
+            <div
+              className="absolute left-1/2 top-1/2 w-[54px] h-[54px] -translate-x-1/2 -translate-y-1/2"
+              style={{
+                background: "radial-gradient(circle, rgba(255,200,87,0.22) 0%, rgba(255,200,87,0) 68%)",
+                animation: "forgeSparkHalo 1.35s ease-in-out infinite"
+              }}
+            />
+          </div>
+          <div className="mono mt-5 text-[7.5px] tracking-[0.34em] text-[#FFC857]/75">{label}</div>
+        </div>
+      );
+    }
+
+    // Keyframes for the forge loader + player affordances (injected once).
+    const FORGE_PLAYER_KEYFRAMES = `
+      @keyframes forgeLineExpand {
+        0%   { transform: scaleX(0.02); opacity: 0.55; }
+        100% { transform: scaleX(1); opacity: 1; }
+      }
+      @keyframes forgeSparkPulse {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1;
+                   box-shadow: 0 0 6px #FFC857, 0 0 14px rgba(255,200,87,0.7); }
+        50%      { transform: translate(-50%, -50%) scale(2.6); opacity: 0.7;
+                   box-shadow: 0 0 12px #FFC857, 0 0 28px rgba(255,200,87,0.45); }
+      }
+      @keyframes forgeSparkHalo {
+        0%, 100% { opacity: 0.18; transform: translate(-50%, -50%) scale(0.85); }
+        50%      { opacity: 0.45; transform: translate(-50%, -50%) scale(1.15); }
+      }
+      @keyframes forgePauseFade {
+        0%   { opacity: 0; transform: scale(0.9); }
+        100% { opacity: 1; transform: scale(1); }
+      }
+      /* HUD chip confirmation: hold, then melt back into the frame. */
+      @keyframes forgeHudFade {
+        0%   { opacity: 0; }
+        12%  { opacity: 1; }
+        70%  { opacity: 1; }
+        100% { opacity: 0; }
+      }
+    `;
+
+    // =======================================================================
+    // CITADEL VIDEO PLAYER (Intro + MindForge cutscenes) -- PHASE 1A
+    // =======================================================================
+    // Video surface shared by the Intro modal and the MindForge cutscene.
+    //  · NO `controls` attribute -> no scrub bar, no timecode, no volume UI.
+    //  · Click anywhere on the video toggles play / pause.
+    //  · SKIP [×] stays pinned to the clean top-right corner.
+    //  · object-contain + max-w-[420px] keeps 9:16, 16:9 and 1:1 masters
+    //    letterboxed correctly on Phone, iPad and PC (never stretched).
+    //
+    // SOUND PROTOCOL
+    //  · Browsers only allow audible autoplay after a user gesture, so the
+    //    element still STARTS muted. It never stays muted: the moment the
+    //    viewer interacts (tap/click/key) the video is unmuted, because that
+    //    gesture is exactly what unblocks audio. `allowAudio={false}` (the
+    //    Atelier's "Ambient Acoustics" = MUTED) keeps it silent on purpose.
+    //  · Audio is only unlocked for masters that actually carry an audio
+    //    track: Chromium cannot answer canPlayType() for "mp4a.40.2" inside
+    //    an MP4, so an audio-less master would otherwise show a dead
+    //    "TAP TO UNMUTE" badge forever.
+    //  · AUDIO [ON] / [MUTED] in the clean top-right corner is the manual
+    //    override, styled like SKIP [×].
+
+    // Audio-track probe.
+    // IMPORTANT: this must never *block* audio. `canPlayType()` cannot answer
+    // "does this MP4 carry AAC?" (Chromium has no such entry), and a wrong
+    // "no" would leave a master that clearly *has* sound permanently muted.
+    // So the probe only ever returns a positive hint; 'unknown' means "try
+    // and let the element decide".
+    let videoAudioHint = ""; // "" unknown | "yes" | "no"
+
+    function videoHasAudioTrack(node) {
+      if (videoAudioHint) return videoAudioHint === "yes";
+      if (!node || typeof node.canPlayType !== "function") return true;
+      // WebKit/Blink expose the decoded-audio byte counter; a positive value
+      // is proof of an audio track.
+      if (typeof node.webkitAudioDecodedByteCount === "number") {
+        if (node.webkitAudioDecodedByteCount > 0) {
+          videoAudioHint = "yes";
+          return true;
+        }
+        if (node.webkitAudioDecodedByteCount === 0 && node.readyState >= 2) {
+          // Metadata + first frames decoded with zero audio bytes: no track.
+          videoAudioHint = "no";
+          return false;
+        }
+      }
+      const answer = node.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
+      if (answer === "") {
+        // The browser rejects the AAC-in-MP4 profile outright.
+        videoAudioHint = "no";
+        return false;
+      }
+      return true; // "probably" or "maybe" (or undecidable) -> let it speak
+    }
+
+    function VideoPlayer({ src, onEnded, onSkip, allowAudio = true }) {
+      const videoRef = useRef(null);
+      const [playing, setPlaying] = useState(false);
+      const [buffering, setBuffering] = useState(true);
+      const [ended, setEnded] = useState(false);
+      const [unmuted, setUnmuted] = useState(false);
+
+      // Autoplay may be blocked until the first user gesture.
+      useEffect(() => {
+        const node = videoRef.current;
+        if (!node) return;
+        const attempt = node.play();
+        if (attempt && typeof attempt.catch === "function") {
+          attempt.catch(() => setPlaying(false));
+        }
+      }, [src]);
+
+      // A muted autoplay is always permitted; the audio is unlocked by the
+      // gesture that opened this player (see `tryUnmute`).
+      useEffect(() => {
+        const node = videoRef.current;
+        if (!node) return;
+        node.muted = true;
+        node.volume = 1;
+        setUnmuted(false);
+      }, [src]);
+
+      // Unmute on any real interaction. Browsers reject audible playback
+      // while the page has no user activation: the promise is swallowed and
+      // the next gesture retries, so audio is never lost for good.
+      const tryUnmute = useCallback(() => {
+        const node = videoRef.current;
+        if (!node || !allowAudio) return;
+        if (!videoHasAudioTrack(node)) return;
+        if (!node.muted) {
+          setUnmuted(true);
+          return;
+        }
+        node.muted = false;
+        node.volume = 1;
+        const attempt = node.play();
+        if (attempt && typeof attempt.catch === "function") {
+          attempt.catch(() => { node.muted = true; setUnmuted(false); });
+        }
+        setUnmuted(!node.muted);
+      }, [allowAudio]);
+
+      // Capture phase: the very click that opened the modal counts as the
+      // gesture, and the listener is not torn down by re-renders.
+      useEffect(() => {
+        if (!allowAudio) return undefined;
+        const onGesture = () => tryUnmute();
+        const events = ["pointerdown", "click", "keydown", "touchend"];
+        events.forEach((name) => window.addEventListener(name, onGesture, { capture: true }));
+        return () => {
+          events.forEach((name) => window.removeEventListener(name, onGesture, { capture: true }));
+        };
+      }, [allowAudio, tryUnmute]);
+
+      // Parent flipped "Ambient Acoustics" to MUTED mid-stream.
+      useEffect(() => {
+        const node = videoRef.current;
+        if (!node) return;
+        if (!allowAudio) {
+          node.muted = true;
+          setUnmuted(false);
+        } else {
+          tryUnmute();
+        }
+      }, [allowAudio, tryUnmute]);
+
+      const toggleAudio = (event) => {
+        event.stopPropagation();
+        const node = videoRef.current;
+        if (!node || !allowAudio) return;
+        if (!node.muted) {
+          node.muted = true;
+          setUnmuted(false);
+        } else {
+          tryUnmute();
+        }
+        if (typeof audio.playClick === "function") audio.playClick();
+      };
+
+      const togglePlayback = () => {
+        const node = videoRef.current;
+        if (!node) return;
+        if (node.paused || node.ended) {
+          const attempt = node.play();
+          if (attempt && typeof attempt.catch === "function") attempt.catch(() => { });
+        } else {
+          node.pause();
+        }
+        tryUnmute();
+        if (typeof audio.playClick === "function") audio.playClick();
+      };
+
+      return (
+        <div className="relative flex-1 w-full h-full bg-black overflow-hidden">
+          <style>{FORGE_PLAYER_KEYFRAMES}</style>
+
+          {/* There is no scrub bar by design — /!\ the volume UI and nofullscreen
+              must NOT sit in controlsList: Chrome's "nodownload" check hides
+              the audio track, and nofullscreen hides the Picture-in-Picture
+              button (→ per-user persistent muting). Controls are never shown
+              anyway, so the list is dropped entirely. */}
+          <video
+            ref={videoRef}
+            src={src}
+            autoPlay
+            muted
+            playsInline
+            preload="auto"
+            disablePictureInPicture
+            onContextMenu={(e) => e.preventDefault()}
+            onClick={togglePlayback}
+            onPlay={() => { setPlaying(true); setEnded(false); }}
+            onPause={() => setPlaying(false)}
+            onPlaying={() => { setBuffering(false); tryUnmute(); }}
+            onCanPlay={() => { setBuffering(false); tryUnmute(); }}
+            onLoadedMetadata={() => {
+              // Only ever *confirm* an audio track here — never deny one.
+              const node = videoRef.current;
+              if (node && typeof node.webkitAudioDecodedByteCount === "number" &&
+                node.webkitAudioDecodedByteCount > 0) {
+                videoAudioHint = "yes";
+              }
+              tryUnmute();
+            }}
+            onWaiting={() => setBuffering(true)}
+            onVolumeChange={() => setUnmuted(!(videoRef.current && videoRef.current.muted))}
+            onEnded={() => {
+              setPlaying(false);
+              setEnded(true);
+              setBuffering(false);
+              if (onEnded) onEnded();
+            }}
+            className="w-full h-full object-contain md:max-w-[420px] mx-auto cursor-pointer select-none"
+            style={{ background: "#000" }}
+          />
+
+          {/* Buffering -> Lighting the Forge (never a circular spinner) */}
+          {buffering && !ended && <ForgeLoader />}
+
+          {/* Click-to-play affordance. pointer-events-none so the video keeps
+              receiving the click target across the whole frame. */}
+          {!playing && !buffering && !ended && (
+            <div
+              className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center"
+              style={{ animation: "forgePauseFade 260ms ease-out both" }}
+            >
+              <div className="w-11 h-11 rounded-full border border-[#FFC857]/60 bg-[#07090E]/60 backdrop-blur-sm flex items-center justify-center">
+                <div
+                  className="w-0 h-0 ml-[3px]"
+                  style={{
+                    borderTop: "6px solid transparent",
+                    borderBottom: "6px solid transparent",
+                    borderLeft: "9px solid #FFC857"
+                  }}
+                />
+              </div>
+              <div className="mono mt-3 text-[7px] tracking-[0.3em] text-[#E8E6E1]/45">
+                TAP TO PLAY
+              </div>
+            </div>
+          )}
+
+          {/* Audio state. The nudge only claims "unmute" when the stream is
+              actually known to carry sound; otherwise it simply invites a tap
+              (which is what a browser needs before any audio is allowed). */}
+          {allowAudio && (unmuted ? (
+            <div
+              key="audio-on"
+              className="pointer-events-none absolute top-4 left-4 z-20 mono text-[7px] tracking-[0.26em] text-[#FFC857]/80"
+              style={{ animation: "forgeHudFade 2600ms ease-out both" }}
+            >
+              AUDIO RESONANT
+            </div>
+          ) : (
+            <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 z-20 border border-[#FFC857]/50 bg-black/70 px-3 py-1 backdrop-blur-sm mono text-[7px] tracking-[0.22em] text-[#FFC857]">
+              {videoAudioHint === "no" ? "NO AUDIO TRACK" : "TAP TO UNMUTE"}
+            </div>
+          ))}
+
+          {/* AUDIO [ON] / [MUTED] — manual override beside SKIP [×] */}
+          {allowAudio && (
+            <button
+              type="button"
+              onClick={toggleAudio}
+              aria-pressed={unmuted}
+              aria-label={unmuted ? "Mute audio" : "Unmute audio"}
+              className="absolute top-4 right-[92px] z-30 mono text-[8.5px] tracking-[0.2em] border border-[#E8E6E1]/40 px-2.5 py-1 text-[#E8E6E1] bg-black/70 backdrop-blur-sm hover:text-[#FFC857] hover:border-[#FFC857]/70 transition-colors"
+            >
+              {unmuted ? "AUDIO [ON]" : "AUDIO [MUTED]"}
+            </button>
+          )}
+
+          {/* SKIP [×] — clean top-right anchor, always reachable */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onSkip) onSkip();
+            }}
+            className="absolute top-4 right-4 z-30 mono text-[8.5px] tracking-[0.2em] border border-[#E8E6E1]/40 px-2.5 py-1 text-[#E8E6E1] bg-black/70 backdrop-blur-sm hover:text-[#FFC857] hover:border-[#FFC857]/70 transition-colors"
+          >
+            SKIP [×]
+          </button>
+        </div>
+      );
+    }
+
+    // =======================================================================
+    // SCREEN 1: THE GATES (LANDING)
+    // =======================================================================
+    function GatesScreen({ onEnterForge, onShowToast }) {
+      const sectors = [
+        { sector: "06", locked: true },
+        { sector: "02", locked: true },
+        { sector: "03", locked: true },
+        { sector: "01", locked: false, lit: true },
+        { sector: "04", locked: true },
+        { sector: "05", locked: true }
+      ];
+
+      return (
+        <div className="relative min-h-screen w-full overflow-x-clip bg-[#07090E] text-[#E8E6E1] flex flex-col justify-between">
+          <div className="pointer-events-none absolute inset-0">
+            <div
+              className="absolute inset-0 opacity-40"
+              style={{
+                backgroundImage: "linear-gradient(to right, rgba(232,230,225,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(232,230,225,0.05) 1px, transparent 1px)",
+                backgroundSize: "48px 48px"
+              }}
+            />
+            <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_40%,transparent_0%,rgba(7,9,14,0.85)_100%)]" />
+          </div>
+
+          <header className="relative z-10 flex w-full flex-col items-center pt-14">
+            <svg width="32" height="48" viewBox="0 0 32 48" className="mb-3 opacity-70 fill-none overflow-visible">
+              <path d="M16 2 L16 44 M8 18 L16 2 L24 18 M6 44 L26 44 M10 28 L22 28 M12 36 L20 36" stroke="#E8E6E1" strokeWidth="1" strokeLinecap="square" />
+              <circle cx="16" cy="2" r="1.5" fill="#FFC857" style={{ animation: "spark-pulse 2.2s infinite" }} />
+            </svg>
+            <h1 className="text-center text-[12px] md:text-[14px] font-normal tracking-[0.42em] text-[#E8E6E1]/70 uppercase font-serif">
+              SHADOWFORGE ACADEMY
+            </h1>
+            <div className="mono text-[7px] md:text-[8px] tracking-[0.22em] text-[#E8E6E1]/30 mt-1 uppercase">
+              EST. FIRST LIGHT // CITADEL PROTOCOL
+            </div>
+            <div className="mt-3 h-px w-16 bg-[#E8E6E1]/20" />
+          </header>
+
+          <main className="relative z-10 flex w-full flex-1 flex-col items-center justify-center py-8 my-auto">
+            <div className="relative w-full">
+              <div className="absolute left-0 right-0 top-[60%] h-px bg-[#E8E6E1]/10" />
+
+              <div className="relative mx-auto flex w-full max-w-4xl items-end justify-center gap-2 md:gap-8 px-4">
+                {sectors.map((s) => (
+                  <button
+                    key={s.sector}
+                    onClick={() => {
+                      if (s.lit) onEnterForge();
+                      else onShowToast(`SECTOR ${s.sector} // SEALED BY THE ARCHITECT`);
+                    }}
+                    className={`group relative flex flex-col items-center focus:outline-none transition-all duration-300 ${s.lit ? 'scale-105' : 'opacity-30 hover:opacity-60'}`}
+                  >
+                    <div className="relative overflow-visible pt-4">
+                      <svg viewBox="0 0 64 132" className="w-11 md:w-16 h-24 md:h-32 fill-none stroke-current overflow-visible" style={{ color: s.lit ? '#FFC857' : '#E8E6E1' }}>
+                        <path d="M8 116 L56 116 L56 124 L8 124 Z M12 108 L52 108 L52 116 L12 116 Z M14 56 L14 108 L50 108 L50 56 Z M18 36 L18 56 L46 56 L46 36 Z M28 8 L32 0 L36 8 L36 36 L28 36 Z" strokeWidth="1" />
+                        <path d="M14 72 L50 72 M14 88 L50 88" strokeWidth="0.7" strokeDasharray="3 3" opacity="0.4" />
+                        <path d="M32 0 L32 108" strokeWidth="0.5" opacity="0.3" />
+
+                        {s.lit && (
+                          <g className="overflow-visible">
+                            <rect x="28" y="64" width="8" height="10" fill="#FFC857" opacity="0.9" style={{ filter: "drop-shadow(0 0 6px #FFC857)" }} />
+                            <circle cx="32" cy="0.5" r="2.5" fill="#FFC857" style={{ animation: "spark-pulse 1.8s infinite" }} />
+                            <g style={{ transformOrigin: "32px 0px", animation: "starburst-spin 12s linear infinite" }}>
+                              <path d="M32 -5 L32 -1 M32 1 L32 5 M27 0 L30 0 M34 0 L37 0" stroke="#FFC857" strokeWidth="0.8" opacity="0.9" />
+                            </g>
+                          </g>
+                        )}
+                        {!s.lit && <circle cx="32" cy="0.5" r="1" fill="#E8E6E1" opacity="0.5" />}
+                      </svg>
+
+                      {s.locked && (
+                        <div className="pointer-events-none absolute left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 opacity-50">
+                          <svg width="18" height="18" viewBox="0 0 22 22" className="fill-none stroke-[#E8E6E1]">
+                            <circle cx="11" cy="11" r="7.5" strokeWidth="1" />
+                            <circle cx="11" cy="11" r="3" strokeWidth="0.8" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-2 text-center mono text-[6.5px] md:text-[8px] tracking-[0.14em]">
+                      {s.lit ? (
+                        <span className="text-[#FFC857]">SECTOR {s.sector} // OPEN</span>
+                      ) : (
+                        <span className="opacity-40">// SECTOR {s.sector}: [CLASSIFIED]</span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-12 flex flex-col items-center gap-3">
+              <button
+                onClick={onEnterForge}
+                className="group relative border border-[#E8E6E1]/70 bg-[#07090E]/60 px-8 py-3 transition-all duration-500 hover:border-[#FFC857] hover:bg-[#07090E]"
+              >
+                <span className="font-serif relative z-10 text-[11px] md:text-[12px] tracking-[0.32em] text-[#E8E6E1] group-hover:text-[#FFC857] transition-colors">
+                  ENTER THE FORGE
+                </span>
+                <span className="pointer-events-none absolute -right-1 -top-1 h-1 w-1 bg-[#FFC857] opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+              <div className="mono text-[7px] tracking-[0.3em] opacity-30">FIRST LIGHT CANON</div>
+            </div>
+          </main>
+
+          <footer className="relative z-10 mt-auto w-full">
+            <div
+              className="relative w-full border-t border-[#E8E6E1]/10 bg-[#07090E] h-20 md:h-24 flex flex-col justify-center items-center cursor-pointer overflow-hidden group"
+              onClick={() => onShowToast("Archive Vault: Sealed until First Course Mastery")}
+            >
+              <div className="absolute top-0 left-0 right-0 h-px bg-[#FFC857]" style={{ animation: "seam-pulse 4s infinite" }}>
+                <div className="h-full w-28 bg-gradient-to-r from-transparent via-white to-transparent opacity-80" />
+              </div>
+
+              <div className="relative z-10 mono text-[7.5px] tracking-[0.24em] text-[#E8E6E1]/40 uppercase mt-2 group-hover:text-[#FFC857]/80 transition-colors">
+                ARCHIVE VAULT // 1000 BLUEPRINTS CONTAINED
+              </div>
+            </div>
+
+            <div className="flex w-full items-center justify-between border-t border-[#E8E6E1]/10 px-6 py-2 mono text-[7px] text-[#E8E6E1]/30">
+              <span>COORDINATE: 0°0'0" // CITADEL ENGINE: ACTIVE</span>
+              <span>SHADOWFORGE ACADEMY</span>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    // =======================================================================
+    // SCREEN 2: ENROLMENT TERMINAL (AUTH)
+    // =======================================================================
+    function EnrolmentScreen({ onBackToGates, onSuccess, onShowToast }) {
+      const [email, setEmail] = useState("");
+      const [transmitting, setTransmitting] = useState(false);
+      const [sealed, setSealed] = useState(false);
+
+      const handleAuth = (e) => {
+        e.preventDefault();
+        if (!email || transmitting || sealed) return;
+        setTransmitting(true);
+
+        setTimeout(() => {
+          setTransmitting(false);
+          setSealed(true);
+          onShowToast("Access key dispatched — check your email.");
+          setTimeout(() => {
+            onSuccess(email);
+          }, 1500);
+        }, 1200);
+      };
+
+      return (
+        <div className="min-h-screen w-full relative flex flex-col justify-between overflow-x-clip bg-[#07090E] text-[#E8E6E1] p-6 font-mono">
+          <header className="relative z-20 w-full flex items-center justify-between">
+            <button onClick={onBackToGates} className="text-[8px] tracking-[0.2em] text-[#E8E6E1]/50 hover:text-[#FFC857]">
+              ← THE GATES
+            </button>
+            <div className="text-[7px] tracking-[0.16em] text-[#E8E6E1]/40">
+              SECURE // RLS ACTIVE // JWT // HTTPONLY
+            </div>
+          </header>
+
+          <main className="relative z-10 w-full max-w-md mx-auto my-auto">
+            <div className="relative bg-[#0A0C14]/90 border border-[#E8E6E1]/30 p-6 md:p-8 shadow-2xl backdrop-blur-md">
+              <div className="border-b border-[#E8E6E1]/10 pb-3 flex justify-between items-baseline">
+                <h2 className="font-serif text-[16px] tracking-[0.2em] text-[#E8E6E1]">FORGE ENTRY</h2>
+                <span className="text-[8px] text-[#FFC857]">VAULT-01</span>
+              </div>
+
+              <form onSubmit={handleAuth} className="mt-6 flex flex-col gap-4">
+                <div>
+                  <label className="text-[7.5px] tracking-[0.2em] text-[#E8E6E1]/40 block mb-1">
+                    IDENTIFICATION // CREDENTIAL
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    disabled={transmitting || sealed}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="// IDENT — ENTER EMAIL FOR ACCESS KEY"
+                    className="w-full h-11 px-3 bg-transparent border border-[#E8E6E1]/30 text-[12px] tracking-[0.04em] text-[#E8E6E1] placeholder:text-[#E8E6E1]/30 focus:outline-none focus:border-[#FFC857] transition-colors"
+                  />
+                  <div className="text-[7px] text-[#E8E6E1]/40 mt-1.5 leading-relaxed">
+                    • Single-use forge key expires in 15 min — sent to your inbox. No password stored.
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={transmitting || sealed || !email}
+                  className="relative w-full h-11 border border-[#E8E6E1]/70 font-serif text-[11px] tracking-[0.22em] text-[#E8E6E1] hover:border-[#FFC857] hover:text-[#FFC857] transition-all disabled:opacity-40"
+                >
+                  {transmitting ? "TRANSMITTING KEY..." : sealed ? "— KEY DISPATCHED —" : "DISPATCH ACCESS KEY"}
+                </button>
+              </form>
+            </div>
+          </main>
+
+          <footer className="text-[7px] tracking-[0.2em] text-[#E8E6E1]/20 text-center">
+            SHADOWFORGE // FIRST LIGHT CANON // ZERO PASSWORDS STORED
+          </footer>
+        </div>
+      );
+    }
+
+    // =======================================================================
+    // SCREEN 3: ATELIER DASHBOARD (THE MASTER HUB)
+    // =======================================================================
+    function AtelierScreen({ onOpenRoadmap, onLogout, onReplayIntro, onSoundMutedChange }) {
+      const [thoughtText, setThoughtText] = useState("Apprentice. Light the forge.");
+      const [activeFocus, setActiveFocus] = useState(null);
+      const [dossierOpen, setDossierOpen] = useState(false);
+      const [activeTheme, setActiveTheme] = useState("shadow");
+      const [soundMuted, setSoundMuted] = useState(false);
+      // Stable so <CitadelEngine>'s toast state can never re-render (and thus
+      // restart) the intro video while it is playing.
+      const replayIntro = useCallback(() => {
+        if (onReplayIntro) onReplayIntro();
+      }, [onReplayIntro]);
+
+      // Push "Ambient Acoustics" up to the engine: MUTED there silences the
+      // intro stream's audio track, RESONANT lets the video speak.
+      useEffect(() => {
+        if (onSoundMutedChange) onSoundMutedChange(soundMuted);
+      }, [soundMuted, onSoundMutedChange]);
+
+      const loreResponses = {
+        calc: "A prodigy who calculated everything... except the flaw. Enter his calculation.",
+        crit: "The universal anchor. Grounding every discipline in the dark.",
+        mindforge: "The first sector blazes. The other citadels wait in silence.",
+        sealed: "Dormant sector. Only a Master may demand its unsealing.",
+        vault: "The Archive Vault. Where failed calculations are dissected.",
+        monolith: "The Monolith reflects your total discipline. Never let your halo crack.",
+        idle: "Apprentice. Light the forge."
+      };
+
+      const handleInspect = (key) => {
+        setActiveFocus(key === "idle" ? null : key);
+        setThoughtText(loreResponses[key] || loreResponses.idle);
+      };
+
+      return (
+        <div className="min-h-screen w-full bg-[#07090e] text-[#E8E2D0] antialiased overflow-x-clip relative selection:bg-[#FFC857]/20 pb-[96px] font-mono">
+          <style>{`
+            @keyframes sparkFlicker {
+              0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 6px #FFC857); }
+              50% { opacity: 0.85; transform: scale(1.08); filter: drop-shadow(0 0 14px rgba(255,200,87,0.7)); }
+              78% { opacity: 1; transform: scale(0.96); }
+            }
+            @keyframes haloPulse {
+              0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.95; }
+              50% { transform: translate(-50%, -50%) scale(1.09); opacity: 0.58; }
+            }
+            @keyframes haloAura {
+              0%, 100% { opacity: 0.22; transform: scale(1); }
+              50% { opacity: 0.12; transform: scale(1.15); }
+            }
+            @keyframes edgeCrawl {
+              0% { transform: translateY(100%); opacity: 0; }
+              12% { opacity: 1; }
+              88% { opacity: 1; }
+              100% { transform: translateY(-140%); opacity: 0; }
+            }
+            @keyframes seamBreathe {
+              0%, 100% { opacity: 0.9; box-shadow: 0 0 18px rgba(255,200,87,0.45), 0 0 40px rgba(255,200,87,0.14); }
+              50% { opacity: 0.6; box-shadow: 0 0 10px rgba(255,200,87,0.2), 0 0 24px rgba(255,200,87,0.06); }
+            }
+            @keyframes bubbleIn {
+              0% { opacity: 0; transform: translateY(6px) scale(0.98); }
+              100% { opacity: 1; transform: translateY(0) scale(1); }
+            }
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          `}</style>
+
+          {/* Background Radiance */}
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_70%_at_50%_0%,rgba(232,226,208,0.06),transparent_50%),radial-gradient(90%_50%_at_50%_100%,rgba(255,200,87,0.04),transparent)]" />
+
+          {/* Top Bar Navigation */}
+          <div className="relative z-10 flex items-center justify-between px-6 md:px-10 pt-6 md:pt-8">
+            <div className="text-[10px] tracking-[0.28em] opacity-60">SHADOWFORGE / ACADEMY</div>
+            <div className="text-[10px] tracking-[0.18em] opacity-40">ATELIER — SECTOR 01 ACTIVE</div>
+          </div>
+
+          {/* Central Monolith & Halo */}
+          <section className="relative z-10 flex flex-col items-center pt-6 md:pt-2 pb-2">
+            <div className="relative flex flex-col items-center">
+
+              <div className="relative cursor-pointer" onClick={() => handleInspect("monolith")}>
+                <div className="absolute left-1/2 top-[4.5%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10">
+                  <div className="relative w-[66px] h-[66px] md:w-[76px] md:h-[76px]">
+                    <div className="absolute inset-0 rounded-full bg-[radial-gradient(50%_50%_at_50%_50%,rgba(255,200,87,0.18),rgba(255,200,87,0.02)_62%,transparent_72%)]" style={{ animation: "haloAura 3.6s ease-in-out infinite" }} />
+                    <div className="absolute inset-[6px] rounded-full border border-[#FFC857]/90 shadow-[0_0_16px_rgba(255,200,87,0.45),inset_0_0_8px_rgba(255,200,87,0.25)]" style={{ animation: "haloPulse 3.8s ease-in-out infinite" }} />
+                    <div className="absolute inset-[14px] rounded-full border border-[#FFC857]/25" />
+                  </div>
+                </div>
+
+                <div className="absolute left-1/2 top-[4.5%] -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
+                  <div className="w-[9px] h-[9px] rounded-full bg-[#FFC857] shadow-[0_0_12px_#FFC857,0_0_28px_rgba(255,200,87,0.7)]" style={{ animation: "sparkFlicker 2.4s ease-in-out infinite" }} />
+                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[20px] h-[20px] rounded-full bg-[#FFC857]/20 blur-[2px]" />
+                </div>
+
+                <svg viewBox="0 0 120 380" className="h-[48vh] md:h-[62vh] w-auto opacity-95" fill="none">
+                  <path d="M60 6 L67 18 L67 54 L74 62 L74 132 L80 140 L80 340 L40 340 L40 140 L46 132 L46 62 L53 54 L53 18 Z" stroke="#E8E2D0" strokeWidth="0.9" strokeOpacity="0.9" fill="none" />
+                  <path d="M53 54 L67 54 M46 132 L74 132 M40 340 L80 340" stroke="#E8E2D0" strokeWidth="0.5" strokeOpacity="0.28" />
+                  <path d="M60 6 L60 340" stroke="#E8E2D0" strokeWidth="0.35" strokeOpacity="0.18" strokeDasharray="3 4" />
+                  <path d="M53 18 L67 18 M54 26 L66 26 M55 38 L65 38" stroke="#E8E2D0" strokeWidth="0.35" strokeOpacity="0.22" />
+                  <path d="M46 62 L46 132 M74 62 L74 132 M53 132 L53 340 M67 132 L67 340" stroke="#E8E2D0" strokeWidth="0.35" strokeOpacity="0.16" />
+                  <path d="M60 12 L60 2" stroke="#FFC857" strokeWidth="0.6" strokeOpacity="0.5" />
+                  <path d="M28 340 L92 340 L90 352 L30 352 Z" stroke="#E8E2D0" strokeWidth="0.6" strokeOpacity="0.28" />
+                  <path d="M34 352 L86 352 L84 358 L36 358 Z" stroke="#E8E2D0" strokeWidth="0.4" strokeOpacity="0.18" />
+                  <g opacity="0.22">
+                    <ellipse cx="52" cy="344" rx="3.2" ry="1.2" fill="#E8E2D0" />
+                    <ellipse cx="68" cy="344" rx="3.2" ry="1.2" fill="#E8E2D0" />
+                  </g>
+                </svg>
+                <div className="pointer-events-none absolute left-1/2 top-[58%] -translate-x-1/2 w-[88px] md:w-[108px] h-[1px] bg-gradient-to-r from-transparent via-[#FFC857]/30 to-transparent blur-[0.3px]" />
+              </div>
+
+              <div className="mt-3 flex flex-col items-center gap-1 cursor-pointer" onClick={() => handleInspect("monolith")}>
+                <div className="font-serif text-[22px] md:text-[26px] tracking-[0.18em] font-light">SHADOWFORGE</div>
+                <div className="text-[9px] tracking-[0.32em] opacity-50 flex items-center gap-2">
+                  <span className="w-[14px] h-[1px] bg-[#E8E2D0]/30" />
+                  ACADEMY LIGHT // SOLID SPARK
+                  <span className="w-[14px] h-[1px] bg-[#E8E2D0]/30" />
+                </div>
+                <div className="text-[7.5px] tracking-[0.2em] text-[#FFC857]/80 mt-1 uppercase">
+                  CITADEL ENGINE // REPUTATION VERIFIED
+                </div>
+              </div>
+            </div>
+
+            {/* Horizon: 6 Citadels */}
+            <div className="mt-8 md:mt-10 w-full relative">
+              <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#E8E2D0]/10 to-transparent pointer-events-none" />
+
+              <div className="flex gap-4 md:gap-7 overflow-x-auto no-scrollbar px-6 md:justify-center md:px-0 py-6 snap-x snap-mandatory">
+
+                {/* MindForge (Lit) */}
+                <div
+                  className={`snap-center shrink-0 flex flex-col items-center gap-2 cursor-pointer transition-all ${activeFocus === "mindforge" ? "scale-[1.04]" : ""}`}
+                  onClick={() => handleInspect("mindforge")}
+                >
+                  <div className="relative w-[96px] md:w-[124px] h-[84px] md:h-[94px]">
+                    <svg viewBox="0 0 120 80" className="w-full h-full fill-none">
+                      <path d="M10 70 L30 18 L42 32 L60 8 L78 32 L90 18 L110 70 Z" fill="rgba(255,200,87,0.09)" stroke="#FFC857" strokeWidth="0.85" strokeOpacity={activeFocus === "mindforge" ? 1 : 0.78} />
+                      <path d="M30 18 L30 70 M60 8 L60 70 M90 18 L90 70" stroke="#FFC857" strokeWidth="0.3" strokeOpacity="0.24" />
+                      <circle cx="60" cy="12" r="2.4" fill="#FFC857" style={{ filter: "drop-shadow(0 0 8px #FFC857)" }} />
+                    </svg>
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[64px] h-[1px] bg-[#FFC857]/60 blur-[0.5px]" />
+                    <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-[82px] h-[14px] bg-[radial-gradient(50%_100%_at_50%_0%,rgba(255,200,87,0.18),transparent)] blur-[0.6px]" />
+                  </div>
+                  <div className="text-[8.5px] tracking-[0.22em] text-[#FFC857]/90">MINDFORGE // SECTOR 01</div>
+                  <div className="text-[6.5px] tracking-[0.16em] opacity-40 max-w-[140px] text-center leading-[1.2]">
+                    WORLD LIGHT // SAGE CONQUERED
+                  </div>
+                </div>
+
+                {/* 5 Dormant Citadels */}
+                {[
+                  "stone remembers nothing",
+                  "where light refused",
+                  "the second silence",
+                  "unwritten weight",
+                  "vault of no name"
+                ].map((quote, idx) => (
+                  <div
+                    key={idx}
+                    className={`snap-center shrink-0 flex flex-col items-center gap-2 cursor-pointer transition-opacity ${activeFocus === "sealed" ? "opacity-80" : "opacity-[0.42] hover:opacity-70"}`}
+                    onClick={() => handleInspect("sealed")}
+                  >
+                    <div className="relative w-[84px] md:w-[108px] h-[72px] md:h-[84px]">
+                      <svg viewBox="0 0 120 80" className="w-full h-full fill-none">
+                        <path d="M12 70 L28 22 L44 36 L60 12 L76 36 L92 22 L108 70 Z" stroke="#E8E2D0" strokeWidth="0.6" strokeOpacity="0.55" />
+                        <path d="M28 22 L28 70 M60 12 L60 70 M92 22 L92 70" stroke="#E8E2D0" strokeWidth="0.25" strokeOpacity="0.18" />
+                      </svg>
+                      <div className="absolute left-1/2 top-[42%] -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full border border-[#E8E2D0]/20 flex items-center justify-center bg-[#07090e]">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#E8E6E1" strokeWidth="1.2" opacity="0.6">
+                          <rect x="5" y="11" width="14" height="10" rx="2" />
+                          <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="text-[7.5px] tracking-[0.18em] max-w-[96px] text-center leading-[1.3] text-[#E8E6E1]/50">
+                      “{quote}”
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Drafting Table / Atelier */}
+          <section className="relative z-10 mt-6 md:mt-8 border-t border-[#E8E2D0]/[0.07] bg-[linear-gradient(180deg,rgba(232,226,208,0.02),transparent_30%)]">
+            <div className="px-6 md:px-10 py-6 flex justify-between items-center">
+              <div className="text-[10px] tracking-[0.3em] opacity-50">DRAFTING TABLE — ATELIER</div>
+              <div className="text-[9px] tracking-[0.2em] text-[#FFC857]/80">FOLIO 01 — ACTIVE</div>
+            </div>
+
+            <div className="px-4 md:px-10 pb-6 flex flex-col md:flex-row gap-10 md:gap-16 items-start md:items-end justify-center max-w-[1120px] mx-auto">
+
+              {/* Main Blueprint 01: Calculus I */}
+              <div className="relative w-full md:w-[520px] shrink-0">
+                <div
+                  className={`group relative cursor-pointer transition-transform ${activeFocus === "calc" ? "scale-[1.015]" : ""}`}
+                  onClick={() => {
+                    handleInspect("calc");
+                    if (onOpenRoadmap) onOpenRoadmap();
+                  }}
+                >
+                  <div className="absolute -inset-[15px] md:-inset-[20px] pointer-events-none">
+                    <svg viewBox="0 0 240 320" className="w-full h-full fill-none">
+                      <rect x="8" y="8" width="224" height="304" rx="3" stroke="#E8E2D0" strokeWidth="0.28" strokeOpacity="0.13" strokeDasharray="7 9" />
+                      <path d="M8 98 L8 8 L232 8" stroke="#FFC857" strokeWidth="1.35" strokeLinecap="round" strokeOpacity="0.95" strokeDasharray="24 76" style={{ filter: "drop-shadow(0 0 7px rgba(255,200,87,0.6))" }} />
+                      <circle cx="8" cy="98" r="2.2" fill="#FFC857" opacity="0.9" style={{ filter: "drop-shadow(0 0 6px #FFC857)" }} />
+                    </svg>
+                  </div>
+
+                  <div className="relative bg-[#0e1016] border border-[#E8E2D0]/20 rounded-[2px] overflow-hidden shadow-[0_0_0_1px_rgba(232,226,208,0.04)_inset,12px_18px_40px_rgba(0,0,0,0.7)]">
+                    <div className="absolute left-0 top-0 bottom-0 w-[22px] bg-[linear-gradient(90deg,rgba(232,226,208,0.08),rgba(232,226,208,0.01))] border-r border-[#E8E2D0]/10" />
+                    <div className="absolute left-[22px] top-0 bottom-0 w-[1px] bg-[#E8E2D0]/10" />
+
+                    {/* Crawling Edge Spark */}
+                    <div className="absolute right-0 top-0 bottom-0 w-[3px] overflow-hidden bg-[#07090e]/60">
+                      <div className="absolute inset-y-0 right-0 w-[1px] bg-[#FFC857]/30" />
+                      <div className="absolute left-0 w-full h-[42px] bg-[#FFC857] shadow-[0_0_12px_#FFC857,0_0_22px_rgba(255,200,87,0.8)]" style={{ animation: "edgeCrawl 2.8s linear infinite" }} />
+                    </div>
+
+                    <div className="pl-[36px] pr-[22px] py-7 md:py-9">
+                      <div className="flex justify-between items-start">
+                        <div className="text-[9px] tracking-[0.22em] opacity-50 leading-[1.4]">
+                          BLUEPRINT 01 // SECTOR: MINDFORGE<br />
+                          CH.01 · SAGE · ACTIVE LOADPATH
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#FFC857] shadow-[0_0_8px_#FFC857]" style={{ animation: "sparkFlicker 1.8s ease-in-out infinite" }} />
+                          <span className="text-[8px] tracking-[0.2em] text-[#FFC857]">ACTIVE</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 relative">
+                        <div className="font-serif text-[42px] md:text-[54px] leading-[0.9] tracking-[-0.02em] font-light">
+                          <div>CALCULUS</div>
+                          <div className="flex items-baseline gap-3">
+                            <span className="text-[30px] md:text-[36px] opacity-70">I</span>
+                            <span className="text-[10px] tracking-[0.2em] opacity-40 translate-y-[-8px]">— EDITION SAGE</span>
+                          </div>
+                        </div>
+
+                        <div className="mt-7 grid grid-cols-[1.2fr_0.8fr] gap-4">
+                          <div className="border border-[#E8E2D0]/15 p-3 relative">
+                            <div className="text-[7px] tracking-[0.2em] opacity-30 absolute -top-2 left-2 bg-[#0e1016] px-1">LIMITS / DERIVATIVE — DETAIL</div>
+                            <svg viewBox="0 0 160 90" className="w-full h-[78px] fill-none">
+                              <path d="M8 70 L152 70 M8 70 L8 8" stroke="#E8E2D0" strokeWidth="0.4" opacity="0.3" />
+                              <path d="M8 58 C40 58, 60 30, 88 22 C118 14, 140 10, 152 6" stroke="#E8E2D0" strokeWidth="0.6" opacity="0.7" />
+                              <circle cx="88" cy="22" r="1.8" fill="#FFC857" />
+                              <path d="M88 22 L88 70" stroke="#FFC857" strokeWidth="0.25" strokeDasharray="2 3" opacity="0.5" />
+                            </svg>
+                          </div>
+
+                          <div className="flex flex-col gap-2">
+                            <div className="border border-[#E8E2D0]/10 p-2">
+                              <div className="text-[6px] opacity-30 uppercase">Rank Ladder</div>
+                              <div className="mt-1 space-y-[3px]">
+                                {["Apprentice", "Scholar", "Expert", "Shadow", "Elite", "Master"].map((rank, idx) => (
+                                  <div key={rank} className={`text-[7px] tracking-[0.14em] flex items-center gap-1.5 ${idx === 0 ? "text-[#FFC857]" : "opacity-25"}`}>
+                                    <span className={`w-[7px] h-[1px] ${idx === 0 ? "bg-[#FFC857]" : "bg-[#E8E2D0]"}`} />
+                                    {rank.toUpperCase()}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-8 flex items-end justify-between border-t border-[#E8E2D0]/10 pt-4">
+                        <div>
+                          <div className="text-[8px] tracking-[0.28em] opacity-40">CURRENT LEVEL</div>
+                          <div className="font-serif text-[20px] tracking-[0.08em] mt-1 flex items-center gap-2">
+                            Apprentice <span className="text-[10px] opacity-40 tracking-[0.2em]">→ SCHOLAR</span>
+                          </div>
+                        </div>
+                        <span className="font-serif text-[12px] tracking-[0.18em] text-[#FFC857] group-hover:translate-x-1 transition-transform">
+                          UNROLL ROADMAP →
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Secondary Card: Critical Thinking (Tilted -1.5deg) */}
+              <div className="relative w-[200px] md:w-[220px] self-end md:self-auto ml-auto md:ml-0 -mt-10 md:mt-0 opacity-80 hover:opacity-100 transition-opacity">
+                <div
+                  className="bg-[#0a0c11] border border-[#E8E2D0]/[0.12] rounded-[1px] p-4 cursor-pointer transition-transform duration-300 rotate-[-1.5deg] hover:rotate-0 hover:scale-[1.03]"
+                  onClick={() => handleInspect("crit")}
+                >
+                  <div className="text-[7px] tracking-[0.18em] opacity-35">BLUEPRINT 00 // UNIVERSAL</div>
+                  <div className="mt-4 font-serif text-[16px] leading-[0.95] tracking-[0.02em] font-light">CRITICAL<br /><span className="opacity-60 text-[13px]">THINKING</span></div>
+                  <div className="mt-4 border border-[#E8E6E1]/10 p-2">
+                    <svg viewBox="0 0 80 40" className="w-full h-[36px] fill-none">
+                      <circle cx="40" cy="20" r="14" stroke="#E8E6E1" strokeWidth="0.3" opacity="0.25" />
+                      <circle cx="40" cy="20" r="1.2" fill="#FFC857" opacity="0.5" />
+                    </svg>
+                  </div>
+                  <div className="text-[6.5px] tracking-[0.2em] opacity-30 mt-4">STATUS: AUTO-GRANTED</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Archive Vault Door */}
+            <div
+              className="relative w-full h-[78px] md:h-[88px] border-t border-[#E8E2D0]/10 bg-[#05060a] overflow-hidden cursor-pointer group"
+              onClick={() => handleInspect("vault")}
+            >
+              <div className="absolute top-0 left-0 right-0 h-[1px] bg-[#FFC857]/70 group-hover:bg-[#FFC857] transition-colors" style={{ animation: "seamBreathe 3.5s ease-in-out infinite" }} />
+              <div className="h-full flex items-center justify-between px-6 md:px-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-[1px] border border-[#E8E2D0]/15 flex items-center justify-center group-hover:border-[#FFC857]/30 transition-colors">
+                    <div className="w-3 h-3 border border-[#E8E2D0]/20 group-hover:border-[#FFC857]/40" />
+                  </div>
+                  <div>
+                    <div className="font-serif text-[14px] tracking-[0.14em]">ARCHIVE VAULT — SEALED — CODEX</div>
+                    <div className="text-[7px] tracking-[0.22em] opacity-30 mt-0.5">DISSECTING FAILED CALCULATIONS // RESTRICTED ACCESS</div>
+                  </div>
+                </div>
+                <div className="text-[7px] tracking-[0.2em] opacity-25 hidden md:block">SEALED UNTIL DISCIPLINE PROVEN</div>
+              </div>
+            </div>
+          </section>
+
+
+
+          {/* Fixed Forge Master Icon (Bottom-Left) */}
+          <div className="fixed left-4 md:left-8 bottom-4 md:bottom-6 z-[60] flex flex-col items-start gap-3">
+
+            {/* Thought Bubble */}
+            <div className="max-w-[320px] md:max-w-[420px] animate-[bubbleIn_0.32s_ease] ml-1">
+              <div className="relative bg-[#E8E2D0] text-[#07090e] rounded-[18px] rounded-bl-[6px] px-4 md:px-5 py-3 shadow-[0_12px_40px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,200,87,0.15)]">
+                <div className="flex items-start gap-2.5">
+                  <div className="mt-[1px] shrink-0 w-5 h-5 rounded-full bg-[#07090e] flex items-center justify-center">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#FFC857] animate-[sparkFlicker_2s_ease-in-out_infinite]" />
+                  </div>
+                  <span className="font-serif italic text-[13px] md:text-[14px] leading-[1.35] tracking-[0.01em]">{thoughtText}</span>
+                </div>
+                <div className="absolute -bottom-1 left-5 w-3 h-3 bg-[#E8E2D0] rotate-45 rounded-[1px]" />
+              </div>
+            </div>
+
+            {/* Forge Master Circular Avatar (Tap to Open Dossier) */}
+            <div className="relative group cursor-pointer" onClick={() => setDossierOpen(true)}>
+              <div className="w-[56px] h-[56px] md:w-[64px] md:h-[64px] rounded-full bg-[#101218] border border-[#E8E2D0]/20 shadow-[0_8px_28px_rgba(0,0,0,0.8),0_0_0_1px_rgba(232,226,208,0.06)_inset,0_0_18px_rgba(255,200,87,0.08)] flex items-center justify-center overflow-hidden hover:border-[#FFC857]/30 transition-colors">
+                <svg viewBox="0 0 64 64" className="w-[52px] h-[52px] md:w-[58px] md:h-[58px] fill-none">
+                  <ellipse cx="32" cy="18" rx="9" ry="10" fill="#151821" stroke="#E8E2D0" strokeOpacity="0.18" strokeWidth="0.6" />
+                  <path d="M12 52 L18 34 L22 30 L32 28 L42 30 L46 34 L52 52" fill="#0f1117" stroke="#E8E2D0" strokeOpacity="0.22" strokeWidth="0.7" />
+                  <path d="M22 30 L32 40 L42 30" stroke="#FFC857" strokeOpacity="0.85" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M32 40 L32 50" stroke="#FFC857" strokeOpacity="0.85" strokeWidth="1.2" />
+                </svg>
+              </div>
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full bg-[#07090e] border border-[#E8E2D0]/15 text-[6px] tracking-[0.2em] opacity-60">FM</div>
+            </div>
+          </div>
+
+          {/* The Architect's Dossier Modal */}
+          {dossierOpen && (
+            <div className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-sm flex items-center justify-center p-6">
+              <div className="relative w-full max-w-md bg-[#0A0C14] border border-[#E8E2D0]/30 p-6 md:p-8 shadow-2xl">
+                <div className="flex justify-between items-center border-b border-[#E8E6E1]/10 pb-4">
+                  <span className="font-serif text-[15px] tracking-[0.2em] text-[#E8E6E1]">FORGE MASTER’S DOSSIER</span>
+                  <button onClick={() => setDossierOpen(false)} className="text-[12px] text-[#E8E6E1]/50 hover:text-[#FFC857]">×</button>
+                </div>
+
+                <div className="my-6 space-y-5">
+                  <div>
+                    <span className="text-[7.5px] tracking-[0.2em] text-[#E8E6E1]/40 block mb-2 uppercase">Atelier Palette (Themes)</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {["shadow", "forge", "codex"].map(t => (
+                        <button
+                          key={t}
+                          onClick={() => setActiveTheme(t)}
+                          className={`text-[8px] py-2 border tracking-[0.14em] uppercase transition-colors ${activeTheme === t ? "border-[#FFC857] text-[#FFC857]" : "border-[#E8E6E1]/20 text-[#E8E6E1]/50"}`}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center py-2 border-t border-[#E8E6E1]/10">
+                    <span className="text-[8px] tracking-[0.18em] text-[#E8E6E1]/70 uppercase">Ambient Acoustics</span>
+                    <button onClick={() => setSoundMuted(!soundMuted)} className="text-[8px] tracking-[0.18em] text-[#FFC857] hover:underline">
+                      {soundMuted ? "MUTED" : "RESONANT"}
+                    </button>
+                  </div>
+
+                  <div className="flex justify-between items-center py-2 border-t border-[#E8E6E1]/10">
+                    <span className="text-[8px] tracking-[0.18em] text-[#E8E6E1]/70 uppercase">Universal Induction (34s)</span>
+                    <button onClick={() => { setDossierOpen(false); replayIntro(); }} className="text-[8px] tracking-[0.18em] text-[#FFC857] hover:underline">
+                      REPLAY →
+                    </button>
+                  </div>
+
+                  <div className="pt-4 border-t border-[#E8E6E1]/10 flex justify-between items-center">
+                    <span className="text-[7.5px] text-[#E8E6E1]/30">IDENT: ENROLLED APPRENTICE</span>
+                    <button
+                      onClick={() => {
+                        setDossierOpen(false);
+                        if (onLogout) onLogout();
+                      }}
+                      className="text-[8px] tracking-[0.16em] text-red-400 hover:text-red-300"
+                    >
+                      DISCONNECT FORGE [LOGOUT]
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // =======================================================================
+    // SCREEN 4: ROADMAP PLATE
+    // =======================================================================
+    function RoadmapScreen({ onBackToAtelier, onEnterMindForge }) {
+      const [actStatus, setActStatus] = useState({ 1: 'active', 2: 'locked', 3: 'locked' });
+      const [selectedActForTelemetry, setSelectedActForTelemetry] = useState(1);
+      const [auraCracked, setAuraCracked] = useState(false);
+      const [temperingTime, setTemperingTime] = useState("14:22");
+      const [thoughtText, setThoughtText] = useState(null);
+
+      const actThoughts = {
+        1: "The bridge fractured at x = 2. Enter to weld the discontinuity before the loadpath collapses.",
+        2: "Patience. The forge isn't hot enough. Seal integrity must be proven before acceleration is priced.",
+        3: "The hourglass does not measure time. It measures what cannot be returned. You will not enter until acceleration is paid for."
+      };
+
+      const handleInspectAct = (actNum) => {
+        setSelectedActForTelemetry(actNum);
+        setThoughtText(actThoughts[actNum]);
+      };
+
+      return (
+        <div className="min-h-screen w-full bg-[#07090E] text-[#E8E6E1] relative flex flex-col justify-between selection:bg-[#FFC857]/30 pb-12 font-mono">
+          <style>{`
+            @keyframes pulse-amber {
+              0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 4px #FFC857); }
+              50% { opacity: 0.65; transform: scale(1.15); filter: drop-shadow(0 0 10px rgba(255,200,87,0.7)); }
+            }
+            @keyframes pulse-cyan {
+              0%, 100% { opacity: 0.9; filter: drop-shadow(0 0 6px #00E5FF); }
+              50% { opacity: 0.5; filter: drop-shadow(0 0 12px rgba(0,229,255,0.8)); }
+            }
+          `}</style>
+
+          {/* Blueprint Grid Background */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-40"
+            style={{
+              backgroundImage: "linear-gradient(to right, rgba(232,230,225,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(232,230,225,0.04) 1px, transparent 1px)",
+              backgroundSize: "24px 24px"
+            }}
+          />
+
+          {/* Header */}
+          <header className="relative z-10 w-full border-b border-[#E8E6E1]/15 px-6 md:px-10 py-5 flex items-start justify-between backdrop-blur-sm bg-[#07090E]/60">
+            <div>
+              <button
+                onClick={onBackToAtelier}
+                className="text-[8px] md:text-[9px] tracking-[0.2em] text-[#E8E6E1]/50 hover:text-[#FFC857] transition-colors mb-2 flex items-center gap-1.5"
+              >
+                <span>←</span> <span>ROLL BACK TO ATELIER</span>
+              </button>
+              <h1 className="font-serif text-[12px] md:text-[14px] tracking-[0.28em] text-[#E8E6E1] font-medium">
+                MINDFORGE // SECTOR 01: CALCULUS I // FOLIO 01
+              </h1>
+              <div className="text-[7.5px] md:text-[8px] tracking-[0.16em] text-[#E8E6E1]/40 mt-1 flex items-center gap-2">
+                <span>MENTOR: SAGE</span>
+                <span>·</span>
+                <span>LOADPATH: <span className="text-[#00E5FF]">ACTIVE</span></span>
+                <span>·</span>
+                <span>T = 0.0s → 3.0s FREEFALL</span>
+              </div>
+            </div>
+
+            <div className="text-right">
+              <span className="text-[7.5px] tracking-[0.2em] text-[#E8E6E1]/30 block">DWG: SF-01-CALC-01</span>
+              <span className="text-[8px] md:text-[9px] tracking-[0.24em] text-[#FFC857] mt-0.5 block">
+                PLATE 01 // FIRST LIGHT
+              </span>
+            </div>
+          </header>
+
+          {/* Main Workspace */}
+          <main className="relative z-10 flex-1 max-w-[1280px] w-full mx-auto px-6 md:px-10 py-8 grid grid-cols-1 md:grid-cols-[1.15fr_0.85fr] gap-12 items-start my-auto">
+
+            {/* LEFT PANE: Vertical Loadpath Spine */}
+            <div className="relative w-full max-w-[540px] mx-auto flex flex-col items-center">
+              <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-[#E8E6E1]/25">
+                <div className="absolute top-[6%] -left-6 text-[7px] text-[#E8E6E1]/30">t=0.0s</div>
+                <div className="absolute top-[36%] -left-6 text-[7px] text-[#E8E6E1]/30">t=1.0s</div>
+                <div className="absolute top-[68%] -left-6 text-[7px] text-[#E8E6E1]/30">t=2.0s</div>
+                <div className="absolute bottom-[2%] -left-6 text-[7px] text-[#E8E6E1]/30">t=3.0s</div>
+
+                <div
+                  className={`absolute left-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-[#FFC857] shadow-[0_0_12px_#FFC857] transition-all duration-1000 ${actStatus[1] === 'mastered' ? 'top-[42%]' : 'top-[16%]'}`}
+                  style={{ animation: "pulse-amber 2.2s infinite" }}
+                />
+              </div>
+
+              {/* ACT I NODE */}
+              <div className="relative z-10 w-full my-6 cursor-pointer" onClick={() => handleInspectAct(1)}>
+                <div className="relative bg-[#0A0C14] border border-[#00E5FF]/40 p-5 md:p-6 shadow-[0_12px_40px_rgba(0,0,0,0.7)] transition-all hover:border-[#00E5FF]">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[7px] tracking-[0.24em] text-[#00E5FF] uppercase block mb-1">
+                        {actStatus[1] === 'mastered' ? "WELD SECURED // MASTERED" : "SECTOR 01 // LOADPATH ACTIVE"}
+                      </span>
+                      <h2 className="font-serif text-[17px] md:text-[19px] tracking-[0.14em] text-[#E8E6E1] font-medium">
+                        ACT I: THE FRACTURED LIMIT
+                      </h2>
+                    </div>
+                    <span className="text-[7.5px] tracking-[0.18em] border border-[#00E5FF]/40 text-[#00E5FF] px-2 py-0.5">
+                      [ ACTIVE ]
+                    </span>
+                  </div>
+
+                  {/* Skybridge SVG */}
+                  <div className="mt-4 border border-[#E8E6E1]/10 bg-[#07090E]/80 p-3">
+                    <svg viewBox="0 0 220 72" className="w-full h-14 fill-none">
+                      <path d="M10 60 L210 60" stroke="#E8E6E1" strokeWidth="0.5" strokeOpacity="0.25" />
+                      <path d="M10 36 L90 36" stroke="#00E5FF" strokeWidth="1.2" />
+                      <circle cx="100" cy="36" r="3.5" stroke="#00E5FF" strokeWidth="1.2" fill="#07090E" className="animate-[pulse-cyan_1.8s_infinite]" />
+                      <path d="M110 36 L210 36" stroke="#00E5FF" strokeWidth="1.2" />
+                      <path d="M10 36 L30 60 L50 36 L70 60 L90 36 M110 36 L130 60 L150 36 L170 60 L190 36 L210 60" stroke="#E8E6E1" strokeWidth="0.4" strokeOpacity="0.3" />
+                      <line x1="100" y1="16" x2="100" y2="56" stroke="#FFC857" strokeWidth="0.6" strokeDasharray="2 2" />
+                      <text x="106" y="24" fill="#FFC857" className="text-[6px]">x = 2 (0/0)</text>
+                    </svg>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between border-t border-[#E8E6E1]/10 pt-3">
+                    <div className="text-[7px] tracking-[0.14em] text-[#E8E6E1]/40">
+                      {"TOLERANCE: 0.00 // SHEAR: UNSTABLE // INTEGRITY: 68%"}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onEnterMindForge) onEnterMindForge(1);
+                      }}
+                      className="border border-[#00E5FF] px-4 py-1.5 font-serif text-[9px] tracking-[0.2em] text-[#00E5FF] hover:bg-[#00E5FF]/10 transition-colors"
+                    >
+                      ENTER MINDFORGE →
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* ACT II NODE (LOCKED) */}
+              <div className="relative z-10 w-full my-6 cursor-pointer opacity-50 hover:opacity-75 transition-opacity" onClick={() => handleInspectAct(2)}>
+                <div className="relative bg-[#07090E] border border-[#E8E6E1]/20 p-5 md:p-6 shadow-lg">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[7px] tracking-[0.24em] text-[#E8E6E1]/40 uppercase block mb-1">
+                        BULKHEAD SEALED // REQUIRES ACT I INTEGRITY
+                      </span>
+                      <h2 className="font-serif text-[16px] md:text-[18px] tracking-[0.14em] text-[#E8E6E1]/70 font-medium">
+                        ACT II: THE COST OF ACCELERATION
+                      </h2>
+                    </div>
+                    <span className="text-[7.5px] tracking-[0.18em] border border-[#E8E6E1]/20 text-[#E8E6E1]/40 px-2 py-0.5">
+                      [ LOCKED ]
+                    </span>
+                  </div>
+                  <div className="mt-4 border border-[#E8E6E1]/10 bg-[#07090E]/60 p-3 flex items-center justify-center">
+                    <svg viewBox="0 0 220 64" className="w-full h-12 fill-none stroke-[#E8E6E1]/40">
+                      <ellipse cx="110" cy="32" rx="48" ry="24" strokeWidth="0.8" />
+                      <ellipse cx="110" cy="32" rx="32" ry="16" strokeWidth="0.6" strokeDasharray="4 2" />
+                      <path d="M80 50 L140 14" stroke="#E8E6E1" strokeWidth="1" strokeOpacity="0.7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* ACT III NODE (LOCKED) */}
+              <div className="relative z-10 w-full my-6 cursor-pointer opacity-30 hover:opacity-50 transition-opacity" onClick={() => handleInspectAct(3)}>
+                <div className="relative bg-[#07090E] border border-[#E8E6E1]/10 p-5 md:p-6 shadow-lg">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[7px] tracking-[0.24em] text-[#E8E6E1]/30 uppercase block mb-1">
+                        DEEP ABYSS // ACCUMULATION SINGULARITY
+                      </span>
+                      <h2 className="font-serif text-[15px] md:text-[17px] tracking-[0.14em] text-[#E8E6E1]/50 font-medium">
+                        ACT III: THE IRREVERSIBLE ACCUMULATION
+                      </h2>
+                    </div>
+                    <span className="text-[7.5px] tracking-[0.18em] border border-[#E8E6E1]/10 text-[#E8E6E1]/30 px-2 py-0.5">
+                      [ LOCKED ]
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT PANE: CAD Forensic Telemetry (Desktop Only) */}
+            <aside className="hidden md:flex flex-col gap-6 sticky top-8">
+              <div className="bg-[#0A0C14] border border-[#E8E6E1]/20 p-6 shadow-2xl">
+                <div className="flex justify-between items-baseline border-b border-[#E8E6E1]/10 pb-3">
+                  <span className="font-serif text-[12px] tracking-[0.24em] text-[#E8E6E1]">CAD FORENSIC TELEMETRY</span>
+                  <span className="text-[7px] tracking-[0.18em] text-[#FFC857]">ACT 0{selectedActForTelemetry} // LIVE</span>
+                </div>
+
+                <div className="mt-6 border border-[#E8E6E1]/15 p-4 bg-[#07090E]">
+                  <div className="text-[7px] tracking-[0.2em] text-[#E8E6E1]/40 mb-3 uppercase">
+                    Structural Discontinuity Analysis
+                  </div>
+                  <div className="text-[8px] tracking-[0.14em] text-[#00E5FF]">
+                    lim (x→2) [ (x-2)(x+2) / (x-2) ] = 4.0000
+                  </div>
+                </div>
+
+                <div className="mt-6 grid grid-cols-2 gap-3 text-[7.5px] tracking-[0.14em]">
+                  <div className="border border-[#E8E6E1]/10 p-2.5">
+                    <span className="opacity-40 block">TOLERANCE</span>
+                    <span className="text-[#00E5FF] mt-1 block">±0.000001 mm</span>
+                  </div>
+                  <div className="border border-[#E8E6E1]/10 p-2.5">
+                    <span className="opacity-40 block">SHEAR COEFFICIENT</span>
+                    <span className="text-[#FFC857] mt-1 block">CRITICAL // 0.68</span>
+                  </div>
+                </div>
+              </div>
+
+              {thoughtText && (
+                <div className="bg-[#E8E2D0] text-[#07090E] p-4 rounded-xl shadow-2xl border border-[#FFC857]/40">
+                  <div className="text-[6.5px] tracking-[0.2em] opacity-60 uppercase mb-1">Forge Master // Audit</div>
+                  <div className="font-serif italic text-[12px] leading-snug">{thoughtText}</div>
+                </div>
+              )}
+            </aside>
+          </main>
+
+          {/* Footer */}
+          <footer className="relative z-10 w-full border-t border-[#E8E6E1]/15 px-6 md:px-10 pt-4 flex flex-col md:flex-row items-center justify-between text-[7.5px] md:text-[8px] tracking-[0.18em] text-[#E8E6E1]/40 gap-2">
+            <div>COORDINATE: MINDFORGE // CITADEL ENGINE // LOADPATH 01</div>
+            <div>© SHADOWFORGE ACADEMY // FIRST LIGHT CANON</div>
+          </footer>
+        </div>
+      );
+    }
+
+
+    // =======================================================================
+    // SCREEN 5: MINDFORGE ACT I · FAULT 01 — "THE LIVING SKYBRIDGE"
+    // =======================================================================
+
+    const MINDFORGE_TRIAL_KEYFRAMES = `
+      /* ---- DECK · STRUCTURAL VIBRATION (tensile shear > 0.70 kN) --------- */
+      @keyframes mf-shear-shiver {
+        0%, 100% { transform: translate3d(0, 0, 0); }
+        8%  { transform: translate3d(-1.4px, 0.8px, 0); }
+        17% { transform: translate3d(1.2px, -0.9px, 0); }
+        26% { transform: translate3d(-1.1px, 1.2px, 0); }
+        35% { transform: translate3d(1.6px, -0.7px, 0); }
+        44% { transform: translate3d(-1.3px, 0.6px, 0); }
+        58% { transform: translate3d(1.1px, 1.1px, 0); }
+        71% { transform: translate3d(-0.9px, -1.2px, 0); }
+        84% { transform: translate3d(1.2px, 0.7px, 0); }
+      }
+      @keyframes mf-shear-violence {
+        0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+        9%  { transform: translate3d(-4px, 3px, 0) rotate(-0.28deg); }
+        23% { transform: translate3d(5px, -4px, 0) rotate(0.34deg); }
+        38% { transform: translate3d(-6px, 4px, 0) rotate(-0.42deg); }
+        52% { transform: translate3d(4px, -3px, 0) rotate(0.26deg); }
+        67% { transform: translate3d(-4px, 2px, 0) rotate(-0.18deg); }
+        81% { transform: translate3d(3px, -1px, 0) rotate(0.12deg); }
+      }
+      /* ---- SHR-1 · LIVING GLASS DEBRIS (zero-g slipstream) --------------- */
+      @keyframes mf-shard-float-a {
+        0%   { transform: translate3d(0, 0, 0) rotate(0deg) skewX(0deg) scale(1); }
+        25%  { transform: translate3d(9px, -14px, 0) rotate(6deg) skewX(2deg) scale(1.03); }
+        50%  { transform: translate3d(-6px, -26px, 0) rotate(-5deg) skewX(-1.4deg) scale(0.98); }
+        75%  { transform: translate3d(12px, -9px, 0) rotate(9deg) skewX(1deg) scale(1.04); }
+        100% { transform: translate3d(0, 0, 0) rotate(0deg) skewX(0deg) scale(1); }
+      }
+      @keyframes mf-shard-float-b {
+        0%   { transform: translate3d(0, 0, 0) rotate(0deg) skewY(0deg) scale(1); }
+        33%  { transform: translate3d(-14px, 11px, 0) rotate(-11deg) skewY(-2deg) scale(0.96); }
+        66%  { transform: translate3d(7px, -17px, 0) rotate(7deg) skewY(1.4deg) scale(1.05); }
+        100% { transform: translate3d(0, 0, 0) rotate(0deg) skewY(0deg) scale(1); }
+      }
+      @keyframes mf-shard-spin {
+        0%   { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes mf-shard-tilt {
+        0%, 100% { transform: rotate(-7deg) translateY(0); }
+        50%      { transform: rotate(7deg) translateY(-5px); }
+      }
+      @keyframes mf-shard-twinkle {
+        0%, 100% { opacity: 0.75; }
+        50%      { opacity: 1; }
+      }
+      /* ---- SHR-2 · TERMINAL-VELOCITY PARTICLES --------------------------- */
+      @keyframes mf-particle-rise {
+        0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+        56%  { transform: translate3d(3px, -42vh, 0); opacity: 0.95; }
+        100% { transform: translate3d(-2px, -58vh, 0); opacity: 0; }
+      }
+      /* ---- GATE 02 · CYAN CUTTING BEAM ---------------------------------- */
+      @keyframes mf-cut-armed {
+        0%, 100% { opacity: 0.75; box-shadow: 0 0 6px rgba(0,229,255,0.7); }
+        50%      { opacity: 1; box-shadow: 0 0 18px rgba(0,229,255,0.95); }
+      }
+      @keyframes mf-cut-ghost {
+        0%   { opacity: 0.5; }
+        50%  { opacity: 0.12; }
+        100% { opacity: 0.5; }
+      }
+      /* ---- SINGULARITY HOLE / TERM CANCELLATION ------------------------- */
+      @keyframes mf-hole-breathe {
+        0%, 100% { opacity: 0.55; transform: scale(1); }
+        50%      { opacity: 1; transform: scale(1.07); }
+      }
+      @keyframes mf-term-disintegrate {
+        0%   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+        60%  { opacity: 0.5; transform: translateY(-6px) scale(1.06); filter: blur(2px); }
+        100% { opacity: 0; transform: translateY(-18px) scale(0.86); filter: blur(6px); }
+      }
+      @keyframes mf-weld-flood {
+        0%   { stroke-dashoffset: 240; opacity: 0.35; }
+        60%  { opacity: 1; }
+        100% { stroke-dashoffset: 0; opacity: 1; }
+      }
+      /* ---- AFTERSHOCK · GIRDER THREE ------------------------------------ */
+      @keyframes mf-aftershock-lamp {
+        0%, 100% { opacity: 0.35; filter: drop-shadow(0 0 4px rgba(255,51,75,0.6)); }
+        50%      { opacity: 1; filter: drop-shadow(0 0 16px rgba(255,51,75,0.95)); }
+      }
+      @keyframes mf-aftershock-drift {
+        0%, 100% { transform: translate3d(0, 0, 0); }
+        50%      { transform: translate3d(0, -2.4px, 0); }
+      }
+      /* ---- AMBIENT / SHELL --------------------------------------------- */
+      @keyframes mf-grid-recede {
+        0%   { opacity: 0.22; }
+        50%  { opacity: 0.34; }
+        100% { opacity: 0.22; }
+      }
+      @keyframes mf-vector-pulse {
+        0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 3px #00E5FF); }
+        50%      { opacity: 0.35; filter: drop-shadow(0 0 10px rgba(0,229,255,0.85)); }
+      }
+      @keyframes mf-sage-speak {
+        0%   { opacity: 0; transform: translateY(6px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes mf-rise-in {
+        0%   { opacity: 0; transform: translateY(10px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .mf-anim { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
+      }
+    `;
+
+    /* =======================================================================
+       THE LIVING SKYBRIDGE — layered canvas over the obsidian void
+       =======================================================================
+       Three stacked layers, each owning one transform channel so nothing
+       fights another:
+
+         L1  deep wireframe grid receding to the vanishing point (never shakes)
+         L2  structural deck + truss: SHIVERS when tensile shear exceeds 0.70 kN
+         L3  instrument plane: fracture hole, ticks, overlays (always crisp)
+
+       Living scenery (upward particles + rotating glass debris) drifts above.
+       Palette: obsidian #07090E · limestone #E8E6E1 · cyan #00E5FF · gold #FFC857
+       ======================================================================= */
+
+    /* Deterministic PRNG so the debris field is stable across re-renders. */
+    function mfSeededRandom(seed) {
+      let state = (seed * 9301 + 49297) % 233280 || 1;
+      return function () {
+        state = (state * 9301 + 49297) % 233280;
+        return state / 233280;
+      };
+    }
+
+    /* Vanishing point of the perspective grid (percentage of the canvas). */
+    const MF_VANISHING_POINT = { x: 50, y: 58 };
+
+    /* L1 — A deep 3D wireframe receding into the centre void: rails converge
+       on the vanishing point, transverse wires are perspective-spaced, and the
+       core of the ellipse is swallowed by pure obsidian so the grid reads as
+       depth rather than a flat backdrop. */
+    function MFPerspectiveGrid() {
+      const vx = MF_VANISHING_POINT.x * 10;
+      const vy = MF_VANISHING_POINT.y * 5.6;
+
+      // Rails fan out from the void; the two central rails are the load axis.
+      const rails = [-260, -170, -100, -46, -16, 16, 46, 100, 170, 260];
+
+      // Each ring is scaled toward the vanishing point -> artificial perspective.
+      const rings = [0.06, 0.13, 0.22, 0.33, 0.47, 0.64, 0.84, 1.08, 1.38];
+
+      return (
+        <svg
+          viewBox="0 0 1000 560"
+          preserveAspectRatio="xMidYMid slice"
+          className="absolute inset-0 h-full w-full"
+          aria-hidden="true"
+          style={{ animation: "mf-grid-recede 11s ease-in-out infinite" }}
+        >
+          <defs>
+            <linearGradient id="mf-grid-fade" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#E8E6E1" stopOpacity="0" />
+              <stop offset="30%" stopColor="#E8E6E1" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#E8E6E1" stopOpacity="0.95" />
+            </linearGradient>
+            <radialGradient id="mf-void-core">
+              <stop offset="0%" stopColor="#07090E" stopOpacity="1" />
+              <stop offset="55%" stopColor="#07090E" stopOpacity="0.68" />
+              <stop offset="100%" stopColor="#07090E" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+
+          {rails.map((offset, i) => (
+            <line
+              key={`rail-${i}`}
+              x1={vx}
+              y1={vy}
+              x2={vx + offset * 6.4}
+              y2="600"
+              stroke="url(#mf-grid-fade)"
+              strokeWidth={i === 4 || i === 5 ? 1 : 0.7}
+              strokeOpacity={i === 4 || i === 5 ? 0.32 : 0.16}
+            />
+          ))}
+
+          {rings.map((scale, i) => {
+            const rx = 150 * scale + 8;
+            const ry = 52 * scale + 3;
+            return (
+              <ellipse
+                key={`ring-${i}`}
+                cx={vx}
+                cy={vy}
+                rx={rx}
+                ry={ry}
+                fill="none"
+                stroke="#E8E6E1"
+                strokeWidth="0.7"
+                strokeOpacity={0.05 + i * 0.035}
+              />
+            );
+          })}
+
+          {/* The void swallows the core of the grid so it reads as depth. */}
+          <ellipse cx={vx} cy={vy} rx="230" ry="120" fill="url(#mf-void-core)" />
+        </svg>
+      );
+    }
+
+    /* SHR-2 — continuous upward-drifting micro-particles. They rise against
+       the terminal-velocity freefall wind; each is depth-scaled for parallax. */
+    function buildMFParticles(seed, count) {
+      const rand = mfSeededRandom(seed + 7);
+      const total = count || 34;
+      return Array.from({ length: total }, (_, i) => {
+        const depth = i % 3; // 0 = far, 2 = near
+        return {
+          key: `mf-particle-${seed}-${i}`,
+          x: rand() * 100,
+          y: 30 + rand() * 80,
+          size: depth === 2 ? 2.2 : depth === 1 ? 1.5 : 1,
+          cyan: rand() > 0.62,
+          depth,
+          dur: 9 + rand() * 16,
+          delay: -rand() * 20
+        };
+      });
+    }
+
+    function MFParticleField({ seed }) {
+      const particles = useMemo(() => buildMFParticles(seed), [seed]);
+      return (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+          {particles.map((p) => (
+            <span
+              key={p.key}
+              className="absolute mf-anim rounded-full"
+              style={{
+                left: `${p.x}%`,
+                top: `${p.y}%`,
+                width: p.size,
+                height: p.size,
+                background: p.cyan ? "#00E5FF" : "#E8E6E1",
+                opacity: 0.1 + p.depth * 0.14,
+                animation: `mf-particle-rise ${p.dur}s linear ${p.delay}s infinite`,
+                willChange: "transform, opacity"
+              }}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    /* SHR-1 — living glass debris: slow, asynchronous float, tilt and spin so
+       the shards read as floating glass in a zero-g slipstream. */
+    function buildMFShards(seed) {
+      const rand = mfSeededRandom(seed);
+      return Array.from({ length: 20 }, (_, i) => {
+        const depth = i % 3; // 0 = far, 2 = near -> drives parallax, blur, opacity
+        const size = 9 + rand() * (depth === 2 ? 52 : 26);
+        return {
+          key: `mf-shard-${seed}-${i}`,
+          x: rand() * 100,
+          y: 4 + rand() * 84,
+          size,
+          rotation: rand() * 360,
+          depth,
+          floatDur: 15 + rand() * 16,
+          floatDelay: -rand() * 14,
+          spinDur: 42 + rand() * 46,
+          spinDelay: -rand() * 30,
+          tiltDur: 7 + rand() * 9,
+          tiltDelay: -rand() * 8,
+          float: depth % 2 === 0 ? "mf-shard-float-a" : "mf-shard-float-b",
+          hot: depth === 2 && rand() > 0.66
+        };
+      });
+    }
+
+    function MFShardField({ seed }) {
+      const shards = useMemo(() => buildMFShards(seed), [seed]);
+      return (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+          {shards.map((s) => (
+            <div
+              key={s.key}
+              className="absolute mf-anim"
+              style={{
+                left: `${s.x}%`,
+                top: `${s.y}%`,
+                width: s.size,
+                height: s.size * 1.34,
+                opacity: 0.16 + s.depth * 0.12,
+                animation: `${s.float} ${s.floatDur}s ease-in-out ${s.floatDelay}s infinite`,
+                filter: `blur(${(2 - s.depth) * 0.7}px)`,
+                willChange: "transform, opacity"
+              }}
+            >
+              {/* Each layer owns one transform channel so float, tilt and spin
+                  never fight for the same property. */}
+              <div
+                className="h-full w-full mf-anim"
+                style={{
+                  animation: `mf-shard-spin ${s.spinDur}s linear ${s.spinDelay}s infinite`
+                }}
+              >
+                <div
+                  className="h-full w-full mf-anim"
+                  style={{
+                    animation: `mf-shard-tilt ${s.tiltDur}s ease-in-out ${s.tiltDelay}s infinite`,
+                    transform: `rotate(${s.rotation}deg)`
+                  }}
+                >
+                  <div
+                    className={s.hot ? "h-full w-full mf-anim" : "h-full w-full"}
+                    style={{
+                      background: s.hot
+                        ? "linear-gradient(135deg, rgba(255,200,87,0.22) 0%, rgba(232,230,225,0.12) 45%, rgba(7,9,14,0) 100%)"
+                        : "linear-gradient(135deg, rgba(232,230,225,0.16) 0%, rgba(0,229,255,0.10) 45%, rgba(7,9,14,0) 100%)",
+                      border: `1px solid ${s.hot ? "rgba(255,200,87,0.28)" : "rgba(232,230,225,0.10)"}`,
+                      clipPath: "polygon(12% 0%, 100% 18%, 84% 100%, 0% 74%)",
+                      animation: s.hot
+                        ? `mf-shard-twinkle ${4 + s.tiltDur}s ease-in-out infinite`
+                        : "none"
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    /* L2 + L3 — the structural span. The deck and truss live in one transform
+       channel so tensile shear above 0.70 kN physically shivers the whole
+       structure; the aftershock escalates that to a violent shudder. */
+    function MFSkybridgeCanvas({ shear, aftershock, severed, welded, seed, fractureX }) {
+      const shivering = shear > 0.7;
+      const structureAnimation = aftershock
+        ? "mf-shear-violence 620ms linear infinite"
+        : shivering
+          ? "mf-shear-shiver 300ms linear infinite"
+          : "none";
+
+      const fx = fractureX;
+
+      return (
+        <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+          {/* Matte obsidian floor */}
+          <div className="absolute inset-0 bg-[#07090E]" />
+
+          {/* L1 — deep 3D wireframe receding into the centre void */}
+          <MFPerspectiveGrid />
+
+          {/* L2 — load-bearing structure (vibrates under shear) */}
+          <div
+            className="absolute inset-0 will-change-transform"
+            style={{ animation: structureAnimation }}
+          >
+            <svg
+              viewBox="0 0 1000 560"
+              preserveAspectRatio="xMidYMid slice"
+              className="h-full w-full"
+            >
+              <defs>
+                <linearGradient id="mf-deck" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#0E131C" />
+                  <stop offset="55%" stopColor="#121722" />
+                  <stop offset="100%" stopColor="#0A0D14" />
+                </linearGradient>
+              </defs>
+
+              {/* Approach spans: limestone girders on either side of the hole */}
+              <line x1="0" y1="300" x2={fx - 64} y2="300" stroke="#E8E6E1" strokeWidth="1" strokeOpacity="0.42" />
+              <line x1={fx + 64} y1="300" x2="1000" y2="300" stroke="#E8E6E1" strokeWidth="1" strokeOpacity="0.42" />
+
+              {/* Deck slab */}
+              <rect x="0" y="300" width={Math.max(0, fx - 64)} height="26" fill="url(#mf-deck)" />
+              <rect x={fx + 64} y="300" width={Math.max(0, 1000 - fx - 64)} height="26" fill="url(#mf-deck)" />
+
+              {/* Truss framework */}
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => {
+                const x = 40 + n * 100;
+                if (x > fx - 70 && x < fx + 70) return null;
+                return (
+                  <g key={`truss-${n}`}>
+                    <line x1={x} y1="300" x2={x + 50} y2="356" stroke="#E8E6E1" strokeWidth="0.5" strokeOpacity="0.18" />
+                    <line x1={x + 50} y1="356" x2={x + 100} y2="300" stroke="#E8E6E1" strokeWidth="0.5" strokeOpacity="0.18" />
+                    <line x1={x} y1="356" x2={x + 100} y2="356" stroke="#E8E6E1" strokeWidth="0.5" strokeOpacity="0.12" />
+                  </g>
+                );
+              })}
+
+              {/* Active deck energy: cyan edge outlining the live span */}
+              <line x1="0" y1="299" x2={fx - 64} y2="299" stroke="#00E5FF" strokeWidth="1" strokeOpacity="0.5" style={{ filter: "drop-shadow(0 0 4px #00E5FF)" }} />
+              <line x1={fx + 64} y1="299" x2="1000" y2="299" stroke="#00E5FF" strokeWidth="1" strokeOpacity="0.5" style={{ filter: "drop-shadow(0 0 4px #00E5FF)" }} />
+            </svg>
+          </div>
+
+          {/* L3 — instrument plane: crisp, unaffected by the shiver */}
+          <svg
+            viewBox="0 0 1000 560"
+            preserveAspectRatio="xMidYMid slice"
+            className="absolute inset-0 h-full w-full"
+          >
+            <defs>
+              <radialGradient id="mf-hole-fade">
+                <stop offset="0%" stopColor="#07090E" stopOpacity="1" />
+                <stop offset="70%" stopColor="#07090E" stopOpacity="0.98" />
+                <stop offset="100%" stopColor="#07090E" stopOpacity="0.72" />
+              </radialGradient>
+              <linearGradient id="mf-weld-glow" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#FFC857" stopOpacity="0" />
+                <stop offset="50%" stopColor="#FFC857" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#FFC857" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+
+            {/* THE SINGULARITY HOLE — swallows the deck until the span is fused */}
+            {!welded && (
+              <g style={{ animation: aftershock ? "mf-aftershock-drift 1.4s ease-in-out infinite" : "none" }}>
+                <ellipse cx={fx} cy="313" rx="78" ry="46" fill="url(#mf-hole-fade)" />
+                <circle
+                  cx={fx} cy="300" r="30"
+                  fill="#07090E"
+                  stroke={aftershock ? "#FF334B" : "#FFC857"}
+                  strokeWidth="1"
+                  strokeOpacity="0.85"
+                  style={{
+                    animation: "mf-hole-breathe 2.6s ease-in-out infinite",
+                    filter: aftershock
+                      ? "drop-shadow(0 0 10px rgba(255,51,75,0.85))"
+                      : "drop-shadow(0 0 8px rgba(255,200,87,0.6))"
+                  }}
+                />
+                {/* Boundary asymptote */}
+                <line
+                  x1={fx} y1="180" x2={fx} y2="420"
+                  stroke={aftershock ? "#FF334B" : "#FFC857"}
+                  strokeWidth="0.6" strokeDasharray="4 4" strokeOpacity="0.5"
+                />
+                <text
+                  x={fx} y="172" textAnchor="middle"
+                  fill={aftershock ? "#FF334B" : "#FFC857"}
+                  style={{ fontFamily: "monospace", fontSize: "9px", letterSpacing: "0.14em" }}
+                >
+                  {severed ? "ROOT SEVERED" : "x = " + seed.targetX}
+                </text>
+              </g>
+            )}
+
+            {/* The molten-gold weld once the span is fused */}
+            {welded && (
+              <g>
+                <line
+                  x1={fx - 90} y1="300" x2={fx + 90} y2="300"
+                  stroke="#FFC857" strokeWidth="3"
+                  style={{
+                    animation: "mf-weld-flood 900ms ease-out 1",
+                    filter: "drop-shadow(0 0 12px #FFC857)"
+                  }}
+                />
+                <circle cx={fx} cy="300" r="5" fill="#FFC857" />
+                <rect x={fx - 90} y="292" width="180" height="16" fill="url(#mf-weld-glow)" opacity="0.5" />
+                <text
+                  x={fx} y="278" textAnchor="middle" fill="#FFC857"
+                  style={{ fontFamily: "monospace", fontSize: "9px", letterSpacing: "0.16em" }}
+                >
+                  PRIMARY WELD LOCKED
+                </text>
+              </g>
+            )}
+
+            {/* Deck ticks — fixed reference marks along the span */}
+            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => {
+              const x = 50 + n * 90;
+              return (
+                <line
+                  key={`tick-${n}`}
+                  x1={x} y1="326" x2={x} y2={n % 5 === 0 ? "338" : "332"}
+                  stroke="#E8E6E1" strokeWidth="0.6" strokeOpacity="0.22"
+                />
+              );
+            })}
+          </svg>
+
+          {/* Living scenery drifting through the freefall slipstream */}
+          <MFParticleField seed={seed.shardSeed} />
+          <MFShardField seed={seed.shardSeed} />
+
+          {/* Matte vignette keeps the instrument panel legible over the void. */}
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_45%,transparent_0%,rgba(7,9,14,0.94)_100%)]" />
+        </div>
+      );
+    }
+
+    /* GATE 02 · the interactive cyan cutting line. Armed only once the root is
+       named. The apprentice must physically drag the beam from one side of the
+       singularity hole to the other; releasing short of the far edge snaps it
+       back and counts as a strike. There is no button that does this for them. */
+    function MFCutLine({ armed, severed, onSever, onMiss, progress }) {
+      const trackRef = useRef(null);
+      const draggingRef = useRef(false);
+      const [x, setX] = useState(16);
+
+      const MID = 50;          // the singularity sits at the track centre
+      const COMMIT = MID + 30; // beam must pass the far edge of the hole
+
+      const ratioFromEvent = (event) => {
+        const node = trackRef.current;
+        if (!node) return null;
+        const box = node.getBoundingClientRect();
+        const clientX =
+          event.touches && event.touches[0] ? event.touches[0].clientX : event.clientX;
+        if (typeof clientX !== "number") return null;
+        return Math.min(100, Math.max(0, ((clientX - box.left) / box.width) * 100));
+      };
+
+      const reset = () => {
+        draggingRef.current = false;
+        progress.current = 0;
+        setX(16);
+      };
+
+      const handleDown = (event) => {
+        if (!armed || severed) return;
+        draggingRef.current = true;
+        progress.current = 0;
+        const ratio = ratioFromEvent(event);
+        if (ratio !== null) setX(ratio);
+      };
+
+      const handleMove = (event) => {
+        if (!draggingRef.current || severed) return;
+        const ratio = ratioFromEvent(event);
+        if (ratio === null) return;
+        setX(ratio);
+        progress.current = Math.max(progress.current, ratio - MID);
+        // A full pass beyond the far edge of the hole commits the sever.
+        if (ratio >= COMMIT) {
+          reset();
+          onSever();
+        }
+      };
+
+      const handleUp = () => {
+        if (!draggingRef.current) return;
+        const travelled = progress.current;
+        reset();
+        // Dragged, but never reached the far side: the deck holds.
+        if (travelled > 4) onMiss();
+      };
+
+      const beamVisible = armed || severed;
+
+      return (
+        <div className="w-full">
+          <div className="flex items-center justify-between mb-2">
+            <span className="mono text-[7px] tracking-[0.26em] text-[#00E5FF]/70">
+              GATE 02 // MONOMOLECULAR CUTTING LINE
+            </span>
+            <span className="mono text-[7px] tracking-[0.22em] text-[#E8E6E1]/30">
+              {severed ? "SEVER COMMITTED" : armed ? "ARMED" : "LOCKED — NAME THE ROOT"}
+            </span>
+          </div>
+
+          <div
+            ref={trackRef}
+            onMouseDown={handleDown}
+            onMouseMove={handleMove}
+            onMouseUp={handleUp}
+            onMouseLeave={handleUp}
+            onTouchStart={handleDown}
+            onTouchMove={handleMove}
+            onTouchEnd={handleUp}
+            className="relative h-24 w-full border border-[#E8E6E1]/15 bg-[#07090E] overflow-hidden"
+            style={{ cursor: armed && !severed ? "crosshair" : "not-allowed" }}
+          >
+            {/* The singularity hole the beam must cross */}
+            <div
+              className="absolute top-1/2 -translate-y-1/2 rounded-full border"
+              style={{
+                left: `${MID}%`,
+                width: "17%",
+                aspectRatio: "1 / 1",
+                transform: "translate(-50%, -50%)",
+                borderColor: severed ? "#FFC857" : "rgba(255,200,87,0.55)",
+                background: "#07090E",
+                boxShadow: severed
+                  ? "0 0 18px rgba(255,200,87,0.7)"
+                  : "0 0 12px rgba(255,200,87,0.35)",
+                animation: severed ? "none" : "mf-hole-breathe 2.6s ease-in-out infinite"
+              }}
+            />
+
+            {/* Guidance ghost beam */}
+            {beamVisible && !severed && (
+              <div
+                className="absolute top-0 bottom-0 w-px"
+                style={{
+                  left: `${MID}%`,
+                  background: "rgba(0,229,255,0.35)",
+                  animation: "mf-cut-ghost 2.2s ease-in-out infinite"
+                }}
+              />
+            )}
+
+            {/* The cyan cutting beam */}
+            {beamVisible && (
+              <div
+                className="absolute top-0 bottom-0"
+                style={{
+                  left: `${x}%`,
+                  width: 2,
+                  transform: "translateX(-1px)",
+                  background: "#00E5FF",
+                  boxShadow: "0 0 14px rgba(0,229,255,0.95), 0 0 4px #00E5FF",
+                  animation: severed ? "none" : "mf-cut-armed 1.4s ease-in-out infinite"
+                }}
+              />
+            )}
+
+            {/* Boundary ticks */}
+            {[0, 1, 2, 3, 4].map((n) => (
+              <div
+                key={`cut-tick-${n}`}
+                className="absolute bottom-0 w-px bg-[#E8E6E1]/20"
+                style={{ left: `${n * 25}%`, height: 6 }}
+              />
+            ))}
+          </div>
+
+          <div className="mono mt-1.5 text-[6.5px] tracking-[0.16em] text-[#E8E6E1]/30">
+            {severed
+              ? "ROOT TERMINATED — DECK SIMPLIFIED"
+              : "DRAG FROM LEFT EDGE, THROUGH THE HOLE, PAST THE FAR EDGE"}
+          </div>
+        </div>
+      );
+    }
+
+    /* FAULT 02 · GATE 01 — THE RADICAL CONJUGATE LASER.
+       Polynomial factoring does nothing to a radical, so the apprentice must
+       physically charge the conjugate beam. Press and hold the core: the beam
+       drives itself across the expression. Only a completed charge multiplies
+       numerator and denominator by (√(x + b) + c) and forces the difference of
+       squares. Releasing mid-charge destabilises the span. There is no shortcut
+       button — the deck is operated, not tapped. */
+    function MFConjugateBeam({ seed, armed, applied, onApply, onMiss, progress }) {
+      const trackRef = useRef(null);
+      const draggingRef = useRef(false);
+      const holdTimer = useRef(null);
+      const [x, setX] = useState(14);
+
+      const MID = 50;
+      const COMMIT = MID + 30;
+
+      const handleDown = (event) => {
+        if (!armed || applied) return;
+        if (event && event.preventDefault) event.preventDefault();
+        if (draggingRef.current) return;
+        draggingRef.current = true;
+        progress.current = 0;
+        setX(14);
+
+        let pos = 14;
+        if (holdTimer.current) clearInterval(holdTimer.current);
+        holdTimer.current = setInterval(() => {
+          pos = Math.min(COMMIT, pos + 3);
+          progress.current = pos - MID;
+          setX(pos);
+          if (pos >= COMMIT) {
+            if (holdTimer.current) clearInterval(holdTimer.current);
+            holdTimer.current = null;
+            draggingRef.current = false;
+            progress.current = 0;
+            pos = 14;
+            setX(14);
+            onApply();
+          }
+        }, 55);
+      };
+
+      const handleMove = () => {
+        // Steering is locked during the charge: the beam only travels forward.
+      };
+
+      const handleUp = () => {
+        if (!draggingRef.current) return;
+        const travelled = progress.current;
+        if (holdTimer.current) clearInterval(holdTimer.current);
+        holdTimer.current = null;
+        draggingRef.current = false;
+        progress.current = 0;
+        setX(14);
+        if (travelled > 4) onMiss();
+      };
+
+      useEffect(() => () => {
+        if (holdTimer.current) clearInterval(holdTimer.current);
+      }, []);
+
+      return (
+        <div className="w-full">
+          <div className="flex items-center justify-between mb-2">
+            <span className="mono text-[7px] tracking-[0.26em] text-[#00E5FF]/70">
+              GATE 01 // CONJUGATE BEAM
+            </span>
+            <span className="mono text-[7px] tracking-[0.22em] text-[#E8E6E1]/30">
+              {applied ? "CONJUGATE APPLIED" : armed ? "HOLD TO CHARGE" : "LOCKED"}
+            </span>
+          </div>
+
+          <div
+            ref={trackRef}
+            onMouseDown={handleDown}
+            onMouseUp={handleUp}
+            onMouseLeave={handleUp}
+            onTouchStart={handleDown}
+            onTouchEnd={handleUp}
+            className="relative h-24 w-full border border-[#E8E6E1]/15 bg-[#07090E] overflow-hidden select-none"
+            style={{ cursor: armed && !applied ? "pointer" : "not-allowed", touchAction: "none" }}
+          >
+            {/* The radical core the beam must sweep through */}
+            <div
+              className="absolute top-1/2 rounded-full border"
+              style={{
+                left: `${MID}%`,
+                width: "18%",
+                aspectRatio: "1 / 1",
+                transform: "translate(-50%, -50%)",
+                borderColor: applied ? "#FFC857" : "rgba(0,229,255,0.55)",
+                background: "#07090E",
+                boxShadow: applied
+                  ? "0 0 20px rgba(255,200,87,0.75)"
+                  : "0 0 14px rgba(0,229,255,0.45)",
+                animation: applied ? "none" : "mf-hole-breathe 2.4s ease-in-out infinite"
+              }}
+            >
+              <span
+                className="absolute inset-0 flex items-center justify-center"
+                style={{ fontFamily: "monospace", fontSize: "13px", color: applied ? "#FFC857" : "#00E5FF" }}
+              >
+                √
+              </span>
+            </div>
+
+            {/* Full-strength conjugate beam */}
+            <div
+              className="absolute top-0 bottom-0"
+              style={{
+                left: `${x}%`,
+                width: 3,
+                transform: "translateX(-1.5px)",
+                background: applied ? "#FFC857" : "#00E5FF",
+                boxShadow: applied
+                  ? "0 0 18px rgba(255,200,87,0.95)"
+                  : "0 0 14px rgba(0,229,255,0.95)",
+                animation: applied ? "none" : "mf-cut-armed 1.4s ease-in-out infinite"
+              }}
+            />
+
+            {[0, 1, 2, 3, 4].map((n) => (
+              <div
+                key={`cb-tick-${n}`}
+                className="absolute bottom-0 w-px bg-[#E8E6E1]/20"
+                style={{ left: `${n * 25}%`, height: 6 }}
+              />
+            ))}
+          </div>
+
+          <div className="mono mt-1.5 text-[6.5px] tracking-[0.16em] text-[#E8E6E1]/30">
+            {applied
+              ? "DIFFERENCE OF SQUARES FORCED — RADICAL CLEARED"
+              : "HOLD THE CORE — THE BEAM DRIVES THROUGH"}
+          </div>
+        </div>
+      );
+    }
+
+    function MindForgeScreen({ onExitToRoadmap, onShowToast }) {
+      // Internal Fault 01 Stages:
+      // 'airlock' -> 'deck_fracture' -> 'blade_slice' -> 'primary_weld' -> 'aftershock_surge' -> 'fault_complete'
+      const [stage, setStage] = useState('airlock');
+      const [seedIdx, setSeedIdx] = useState(0);
+
+      // Which trial is live. Fault 01 = polynomial removable singularity;
+      // Fault 02 = radical conjugate laser.
+      const [trial, setTrial] = useState(1);
+
+      // Fault 02 state — conjugate beam gate + precision tumbler.
+      const [conjugateApplied, setConjugateApplied] = useState(false);
+      const conjProgress = useRef(0);
+
+      // Fault 02 seed catalog. b/c drive the conjugate (√(x + b) + c); the
+      // deck height is always the limit 1 / (2c) written to four decimals.
+      const RADICAL_SEEDS = [
+        {
+          id: "rad_alpha",
+          targetX: 2,
+          b: 7,
+          c: 3,
+          shardSeed: 61,
+          fractureOffset: -0.3,
+          formula: "(√(x + 7) - 3) / (x - 2)",
+          conjugate: "(√(x + 7) + 3)",
+          numeratorAfter: "(x + 7) - 9",
+          simplified: "1 / (√(x + 7) + 3)",
+          answer: 0.1667
+        },
+        {
+          id: "rad_beta",
+          targetX: 2,
+          b: 2,
+          c: 2,
+          shardSeed: 73,
+          fractureOffset: 0.3,
+          formula: "(√(x + 2) - 2) / (x - 2)",
+          conjugate: "(√(x + 2) + 2)",
+          numeratorAfter: "(x + 2) - 4",
+          simplified: "1 / (√(x + 2) + 2)",
+          answer: 0.25
+        },
+        {
+          id: "rad_gamma",
+          targetX: 7,
+          b: 9,
+          c: 4,
+          shardSeed: 89,
+          fractureOffset: 0.5,
+          formula: "(√(x + 9) - 4) / (x - 7)",
+          conjugate: "(√(x + 9) + 4)",
+          numeratorAfter: "(x + 9) - 16",
+          simplified: "1 / (√(x + 9) + 4)",
+          answer: 0.125
+        }
+      ];
+      const activeRadical = RADICAL_SEEDS[seedIdx % RADICAL_SEEDS.length];
+
+      // Seed Catalog
+      const SEEDS = [
+        {
+          id: "alpha",
+          targetX: 2,
+          shardSeed: 11,
+          fractureOffset: -0.4,
+          formula: "(x² - 4) / (x - 2)",
+          factored: "(x - 2)(x + 2) / (x - 2)",
+          simplified: "y = x + 2",
+          primaryAnswer: "4.0000",
+          aftershockFormula: "y = 2x + 1",
+          aftershockAnswer: "5.0000"
+        },
+        {
+          id: "beta",
+          targetX: 3,
+          shardSeed: 27,
+          fractureOffset: 0.25,
+          formula: "(x² - x - 6) / (x - 3)",
+          factored: "(x - 3)(x + 2) / (x - 3)",
+          simplified: "y = x + 2",
+          primaryAnswer: "5.0000",
+          aftershockFormula: "y = 3x - 2",
+          aftershockAnswer: "7.0000"
+        },
+        {
+          id: "gamma",
+          targetX: 4,
+          shardSeed: 43,
+          fractureOffset: 0.55,
+          formula: "(x² - 16) / (x - 4)",
+          factored: "(x - 4)(x + 4) / (x - 4)",
+          simplified: "y = x + 4",
+          primaryAnswer: "8.0000",
+          aftershockFormula: "y = 2x - 3",
+          aftershockAnswer: "5.0000"
+        }
+      ];
+      const activeSeed = SEEDS[seedIdx % SEEDS.length];
+
+      // Canvas geometry: the singularity sits off the deck mid-axis per seed.
+      const fractureX = 500 + activeSeed.fractureOffset * 120;
+
+      /* ANTI-GUESSWORK · the four root candidates are shuffled per seed so the
+         correct root is never parked in a fixed slot. The order is derived from
+         the seed index, so it is stable for a given seed but different across
+         seeds and across re-seeds. */
+      const rootOptions = useMemo(() => {
+        const options = [
+          "(x - " + activeSeed.targetX + ")",
+          "(x + " + activeSeed.targetX + ")",
+          "(x - 1)",
+          "(x + 1)"
+        ];
+        // Deterministic Fisher–Yates seeded by the seed variant.
+        let state = (seedIdx + 1) * 2654435761 % 2147483647;
+        const rand = () => {
+          state = (state * 48271) % 2147483647;
+          return state / 2147483647;
+        };
+        for (let i = options.length - 1; i > 0; i--) {
+          const j = Math.floor(rand() * (i + 1));
+          const tmp = options[i];
+          options[i] = options[j];
+          options[j] = tmp;
+        }
+        return options;
+      }, [seedIdx, activeSeed.targetX]);
+
+      // Fault 01 gate state — nothing is handed over for free.
+      const [rootPicked, setRootPicked] = useState(null);
+      const [severed, setSevered] = useState(false);
+      const [welded, setWelded] = useState(false);
+      const cutProgress = useRef(0);
+
+      // Physical Structural State
+      const [shearStress, setShearStress] = useState(0.48);
+      const [tumblerInput, setTumblerInput] = useState("");
+      const [freefallClock, setFreefallClock] = useState(0.00);
+      const [strikeCount, setStrikeCount] = useState(0);
+      const [aftershockTimer, setAftershockTimer] = useState(15);
+      const [archivistLock, setArchivistLock] = useState(false);
+
+      // Cognitive Dialogue Transmission
+      const [dialogue, setDialogue] = useState({
+        speaker: "SAGE",
+        text: "The skybridge deck is flexing under load. Verify boundary coordinates at the airlock."
+      });
+
+      // Freefall Dilation Timer
+      useEffect(() => {
+        const interval = setInterval(() => {
+          setFreefallClock(t => +(t + 0.01).toFixed(2));
+        }, 100);
+        return () => clearInterval(interval);
+      }, []);
+
+      // Aftershock Countdown Timer
+      useEffect(() => {
+        let t;
+        if (stage === 'aftershock_surge' && aftershockTimer > 0) {
+          t = setInterval(() => {
+            setAftershockTimer(prev => {
+              if (prev <= 1) {
+                handleFailure("AFTERSHOCK BREACH: Girder sheared before secondary pin locked. Node collapsed.");
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+        }
+        return () => clearInterval(t);
+      }, [stage, aftershockTimer]);
+
+      // Error and Strike Handling
+      const handleFailure = (customMsg) => {
+        const next = strikeCount + 1;
+        setStrikeCount(next);
+        audio.playAlarm();
+        setShearStress(s => Math.min(1.0, +(s + 0.18).toFixed(2)));
+        setTumblerInput("");
+
+        if (next === 1) {
+          setDialogue({
+            speaker: "SAGE",
+            text: customMsg || "That wasn't a calculation. That was a prayer. We don't pray on a skybridge. Factor it."
+          });
+        } else if (next === 2) {
+          setDialogue({
+            speaker: "SAGE",
+            text: "Fascinating. A limit that violates basic arithmetic. Did you close your eyes, or are you genuinely testing me?"
+          });
+        } else {
+          // Strike 3: Archivist Lockout & Seed Mutation
+          setArchivistLock(true);
+          setDialogue({
+            speaker: "ARCHIVIST",
+            text: "Do not guess again. Structural integrity compromised."
+          });
+
+          setTimeout(() => {
+            setArchivistLock(false);
+            setStrikeCount(0);
+            // Re-seed within the CURRENT fault, never cross back to Fault 01.
+            if (trial === 2) {
+              setSeedIdx((seedIdx + 1) % RADICAL_SEEDS.length);
+              setStage('radical_brief');
+              setConjugateApplied(false);
+              conjProgress.current = 0;
+              setTumblerInput("");
+              setShearStress(0.65);
+              setDialogue({
+                speaker: "SAGE",
+                text: "...New radical, same law. Fire the conjugate before you touch the tumbler."
+              });
+            } else {
+              setSeedIdx((seedIdx + 1) % SEEDS.length);
+              setStage('deck_fracture');
+              setShearStress(0.55);
+              // Wipe every gate so the fresh seed starts from a clean span.
+              setRootPicked(null);
+              setSevered(false);
+              setWelded(false);
+              setTumblerInput("");
+              cutProgress.current = 0;
+              setAftershockTimer(15);
+              setDialogue({
+                speaker: "SAGE",
+                text: "...She re-seeded the boundary coordinate. Fresh numbers, fresh hole. Grab your pen and do it properly this time."
+              });
+            }
+          }, 4500);
+        }
+      };
+
+      // Keypad Input Handlers
+      const handleKey = (char) => {
+        audio.playClick();
+        if (tumblerInput.length < 6) setTumblerInput(prev => prev + char);
+      };
+      const handleClear = () => {
+        audio.playClick();
+        setTumblerInput("");
+      };
+
+      return (
+        <div className="min-h-screen w-full bg-[#07090E] text-[#E8E6E1] flex flex-col justify-between p-4 md:p-8 font-mono relative overflow-hidden select-none">
+          <style>{MINDFORGE_TRIAL_KEYFRAMES}</style>
+
+          {/* FLOATING 3D GLASS SHARDS DRIFTING IN FREEFALL SLIPSTREAM */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <svg className="absolute w-28 h-28 left-[10%] top-[20%] opacity-40 animate-pulse">
+              <polygon points="10,10 80,30 60,90 20,70" stroke="#00E5FF" strokeWidth="0.8" fill="rgba(0,229,255,0.03)" />
+              <line x1="10" y1="10" x2="60" y2="90" stroke="#00E5FF" strokeWidth="0.3" strokeDasharray="3 3" />
+            </svg>
+            <svg className="absolute w-32 h-32 right-[12%] top-[35%] opacity-35">
+              <polygon points="20,15 100,10 85,100 15,80" stroke="#E8E6E1" strokeWidth="0.8" fill="rgba(255,200,87,0.02)" />
+            </svg>
+          </div>
+
+          {/* TOP STRUCTURAL TELEMETRY HUD */}
+          <header className="relative z-20 flex justify-between items-center border-b border-[#E8E6E1]/15 pb-4 backdrop-blur-sm bg-[#07090E]/60">
+            <div>
+              <button onClick={onExitToRoadmap} className="text-[8px] opacity-40 hover:text-[#FFC857] mb-1 block">
+                ← EXIT SIMULATION TO ROADMAP
+              </button>
+              <div className="font-serif text-[13px] md:text-[15px] tracking-[0.2em] text-[#E8E6E1]">
+                MINDFORGE // SAGEFORGE - 09
+              </div>
+            </div>
+
+            <div className="flex items-center gap-6 md:gap-12 text-right text-[8px] tracking-[0.14em]">
+              <div>
+                <span className="text-[#E8E6E1]/40 block text-[6.5px]">FREEFALL</span>
+                <span className="text-[#00E5FF] font-bold">t = {freefallClock}s</span>
+              </div>
+              <div>
+                <span className="text-[#E8E6E1]/40 block text-[6.5px]">TENSILE SHEAR</span>
+                <span className={`font-bold transition-colors ${shearStress > 0.8 ? 'text-red-400 animate-pulse' : 'text-[#FFC857]'}`}>
+                  {(shearStress * 100).toFixed(1)} kN/m²
+                </span>
+              </div>
+              <div>
+                <span className="text-[#E8E6E1]/40 block text-[6.5px]">SEED</span>
+                <span className="text-[#FFC857] font-bold">VAR_{activeSeed.id.toUpperCase()}</span>
+              </div>
+            </div>
+          </header>
+
+          {/* =========================================================================
+              MAIN INTERACTIVE WORKSPACE
+             ========================================================================= */}
+          <main className="relative z-10 my-auto max-w-2xl mx-auto w-full flex flex-col items-center">
+            
+            {/* ---------------------------------------------------------------------
+                PHASE 0: AIR-LOCK GATE DIAGNOSTIC
+               --------------------------------------------------------------------- */}
+            {stage === 'airlock' && (
+              <div className="w-full max-w-md bg-[#0A0C14] border border-[#00E5FF]/40 p-6 md:p-8 shadow-2xl">
+                <div className="font-serif text-[16px] text-center text-[#E8E6E1] mb-1">AIR-LOCK DIAGNOSTIC</div>
+                <div className="text-[7.5px] text-center opacity-40 mb-4">Evaluate boundary coordinate on paper:</div>
+
+                <div className="py-4 px-4 border border-[#00E5FF]/40 bg-[#07090E] text-center w-full my-2">
+                  <div className="font-serif text-[22px] text-[#E8E6E1]">lim (x→{activeSeed.targetX}) [ {activeSeed.formula} ]</div>
+                  <div className="text-[7.5px] text-[#FFC857] mt-1">Direct substitution: What does the deck register?</div>
+                </div>
+
+                <div className="w-full h-11 border border-[#00E5FF] bg-[#07090E] flex items-center justify-between px-4 my-3">
+                  <span className="text-[7.5px] opacity-40">REGISTER:</span>
+                  <span className="text-[17px] font-bold text-[#00E5FF]">{tumblerInput || "— —"}</span>
+                </div>
+
+                <div className="grid grid-cols-4 gap-1.5 w-full">
+                  {["1", "2", "3", "0", "4", "5", "6", "/", "7", "8", "9", "-"].map(k => (
+                    <button key={k} onClick={() => handleKey(k)} className="h-10 border border-[#E8E6E1]/20 bg-[#07090E] text-[13px] hover:border-[#00E5FF] active:scale-95 transition-all">
+                      {k}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 w-full mt-2">
+                  <button onClick={handleClear} className="py-2.5 border border-[#E8E6E1]/20 text-[8px] opacity-50 hover:opacity-90 hover:border-[#00E5FF]/50">CLR</button>
+                  <button 
+                    onClick={() => {
+                      if (tumblerInput === "0/0") {
+                        audio.playPneumatic();
+                        setTumblerInput("");
+                        setStage('deck_fracture');
+                        setDialogue({
+                          speaker: "SAGE",
+                          text: "0/0 verified. Indeterminate removable hole. Air-lock unbolted. Stepping onto the skybridge deck."
+                        });
+                      } else {
+                        handleFailure("Direct evaluation yields 0/0. It is indeterminate. Do not guess.");
+                      }
+                    }} 
+                    className="py-2.5 border border-[#FFC857] bg-[#FFC857]/10 text-[8.5px] text-[#FFC857] font-semibold hover:bg-[#FFC857]/20"
+                  >
+                    COMMIT
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ---------------------------------------------------------------------
+                PHASE 1: THE LIVING SKYBRIDGE DECK & SEVERING BLADE
+               --------------------------------------------------------------------- */}
+            {(stage === 'deck_fracture' || stage === 'blade_slice' || stage === 'primary_weld' || stage === 'aftershock_surge' || stage === 'fault_complete') && (
+              <div className="w-full flex flex-col items-center">
+                
+                {/* THE LIVING SKYBRIDGE — perspective wireframe, drifting
+                    particles, floating glass debris, and a structure that
+                    physically shivers once tensile shear passes 0.70 kN. */}
+                <div className="relative w-full h-56 md:h-72 border border-[#E8E6E1]/10 overflow-hidden">
+                  <MFSkybridgeCanvas
+                    shear={shearStress}
+                    aftershock={stage === 'aftershock_surge'}
+                    severed={severed}
+                    welded={welded}
+                    seed={activeSeed}
+                    fractureX={fractureX}
+                  />
+                </div>
+
+                {/* TACTILE INTERACTION DOCK */}
+                <div className="w-full max-w-xl mt-4">
+                  {/* STAGE: DECK FRACTURE (INITIAL OBSERVATION) */}
+                  {stage === 'deck_fracture' && (
+                    <div className="bg-[#0A0C14] border border-[#00E5FF]/30 p-6 text-center shadow-xl">
+                      <div className="mono text-[7px] tracking-[0.24em] text-[#00E5FF] mb-1">FAULT 01 // LOADPATH BREACH DETECTED</div>
+                      <div className="serif text-[20px] text-[#E8E6E1] mb-2">{activeSeed.formula}</div>
+                      <p className="mono text-[7.5px] text-[#E8E6E1]/60 mb-4 leading-relaxed">
+                        Factor the numerator on paper. Then name the cancelling root yourself — nothing is expanded for you.
+                      </p>
+
+                      {/* GATE 01 · IDENTIFY — the apprentice must name the
+                          cancelling root. There is deliberately no button that
+                          factors the numerator on their behalf. */}
+                      <div className="mono text-[7px] tracking-[0.24em] text-[#E8E6E1]/35 mb-2">
+                        GATE 01 // NAME THE CANCELLING ROOT
+                      </div>
+                      <div className="grid grid-cols-4 gap-1.5 w-full">
+                        {rootOptions.map((option) => {
+                          const isHeld = rootPicked === option;
+                          return (
+                            <button
+                              key={option}
+                              onClick={() => {
+                                audio.playClick();
+                                setRootPicked(option);
+                                setDialogue({
+                                  speaker: "SAGE",
+                                  text: "Root (" + option + ") held. Now drag the cutting line clean across the singularity. Half a stroke will not hold the deck."
+                                });
+                              }}
+                              className="h-10 border mono text-[9px] tracking-[0.04em] transition-all active:scale-[0.97]"
+                              style={{
+                                borderColor: isHeld ? "#FFC857" : "rgba(232,230,225,0.18)",
+                                background: isHeld ? "rgba(255,200,87,0.1)" : "#07090E",
+                                color: isHeld ? "#FFC857" : "rgba(232,230,225,0.82)"
+                              }}
+                            >
+                              {option}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {rootPicked && (
+                        <div className="mono mt-2 text-[7px] tracking-[0.16em] text-[#FFC857]/80">
+                          ROOT HELD → PROCEED TO THE CUTTING LINE
+                        </div>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          if (!rootPicked) {
+                            handleFailure("You reached for the blade without naming a root. Guessing is not engineering.");
+                            return;
+                          }
+                          audio.playSlice();
+                          setStage('blade_slice');
+                          setDialogue({
+                            speaker: "SAGE",
+                            text: "Root " + rootPicked + " held. The numerator factors to " + activeSeed.factored + ". Now sever it — drag the cutting line across the hole."
+                          });
+                        }}
+                        className="mt-4 border border-[#00E5FF] px-8 py-3 mono text-[9px] tracking-[0.2em] text-[#00E5FF] font-bold hover:bg-[#00E5FF]/10 transition-all w-full"
+                      >
+                        PROCEED TO CUTTING LINE →
+                      </button>
+                    </div>
+                  )}
+
+                  {/* STAGE: GATE 02 · MONOMOLECULAR BLADE SLICE */}
+                  {stage === 'blade_slice' && (
+                    <div className="bg-[#0A0C14] border border-[#FFC857]/40 p-6 text-center shadow-xl">
+                      <div className="mono text-[7px] tracking-[0.24em] text-[#FFC857] mb-1">INTERACTIVE BLADE // SEVER ROOT</div>
+                      <div className="serif text-[22px] text-[#E8E6E1] my-3">
+                        <span className="line-through text-[#FFC857] opacity-80">(x - {activeSeed.targetX})</span>(x + {activeSeed.targetX}) / <span className="line-through text-[#FFC857] opacity-80">(x - {activeSeed.targetX})</span>
+                      </div>
+                      <p className="mono text-[7.5px] text-[#E8E6E1]/50 mb-4">
+                        Drag the cyan cutting line clean across the singularity. Releasing short snaps it back.
+                      </p>
+
+                      <MFCutLine
+                        armed={true}
+                        severed={severed}
+                        progress={cutProgress}
+                        onSever={() => {
+                          audio.playSlice();
+                          setSevered(true);
+                          setDialogue({
+                            speaker: "SAGE",
+                            text: "Singularity severed. The deck simplifies to " + activeSeed.simplified + ". Pen to paper — what is the limit height as x approaches " + activeSeed.targetX + "?"
+                          });
+                          setTimeout(() => setStage('primary_weld'), 700);
+                        }}
+                        onMiss={() => {
+                          handleFailure("Half a stroke. The factor is still live and the deck noticed. Sever it completely.");
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* STAGE: PRIMARY WELD HEIGHT TUMBLER (PEN & PAPER CALCULATION) */}
+                  {stage === 'primary_weld' && (
+                    <div className="bg-[#0A0C14] border border-[#FFC857]/40 p-6 shadow-xl text-center">
+                      <div className="mono text-[7.5px] tracking-[0.2em] text-[#FFC857] mb-1">PRIMARY HYDRAULIC WELD // SCRATCHPAD EVALUATION</div>
+                      <div className="serif text-[22px] text-[#E8E6E1] mb-2">{activeSeed.simplified}</div>
+                      <p className="mono text-[7.5px] text-[#E8E6E1]/60 mb-4">
+                        Grab your notepad. Evaluate {activeSeed.simplified} at boundary x = {activeSeed.targetX}. Punch the exact height:
+                      </p>
+
+                      <div className="w-full h-11 border border-[#FFC857] bg-[#07090E] flex items-center justify-between px-4 mb-3">
+                        <span className="text-[7.5px] text-[#FFC857]/40 tracking-[0.2em]">WELD HEIGHT:</span>
+                        <span className="text-[17px] font-bold text-[#FFC857] tracking-[0.18em]">
+                          {tumblerInput || "—.————"}
+                        </span>
+                      </div>
+
+                      {/* GATE 03 · full mechanical tumbler. Four decimal places
+                          must be dialled by hand — no free-click shortcut. */}
+                      <div className="grid grid-cols-4 gap-1.5 w-full">
+                        {["7", "8", "9", "CLR", "4", "5", "6", ".", "1", "2", "3", "0"].map((k) => (
+                          <button
+                            key={k}
+                            onClick={() => {
+                              audio.playClick();
+                              if (k === "CLR") {
+                                setTumblerInput("");
+                                return;
+                              }
+                              setTumblerInput((prev) => {
+                                if (k === "." && prev.includes(".")) return prev;
+                                // Cap at four decimals.
+                                const parts = prev.split(".");
+                                if (parts[1] && parts[1].length >= 4) return prev;
+                                return prev + k;
+                              });
+                            }}
+                            className={`h-9 border mono text-[11px] tracking-[0.06em] transition-colors ${
+                              k === "CLR" || k === "."
+                                ? "border-[#FFC857]/40 text-[#FFC857] hover:bg-[#FFC857]/10"
+                                : "border-[#E8E6E1]/20 bg-[#07090E] text-[#E8E6E1] hover:border-[#FFC857]"
+                            }`}
+                          >
+                            {k}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const expected = Number.parseFloat(activeSeed.primaryAnswer);
+                          const parsed = Number.parseFloat(tumblerInput);
+                          if (Number.isFinite(parsed) && Math.abs(parsed - expected) < 0.00005) {
+                            audio.playWeld();
+                            setTumblerInput("");
+                            setWelded(true);
+                            setShearStress(0.85); // STRESS SURGE!
+                            setAftershockTimer(15); // restart the 15s clock
+                            setStage('aftershock_surge'); // TRIGGER THE UNPREDICTABLE TWIST!
+                            setDialogue({
+                              speaker: "SAGE",
+                              text: "Primary weld locked. Of course the load had to go somewhere — AFTERSHOCK on girder three. Fifteen seconds before it snaps."
+                            });
+                          } else {
+                            handleFailure("Weld height mismatch. Evaluate y = x + " + activeSeed.targetX + " at boundary x = " + activeSeed.targetX + ".");
+                          }
+                        }}
+                        className="mt-3 w-full py-2.5 border border-[#FFC857] bg-[#FFC857]/15 mono text-[8.5px] tracking-[0.2em] text-[#FFC857] font-bold hover:bg-[#FFC857]/30 transition-all"
+                      >
+                        LOCK PRIMARY WELD SEAM
+                      </button>
+                    </div>
+                  )}
+
+                  {/* STAGE: THE UNPREDICTABLE TWIST (AFTERSHOCK SURGE · 15s CLOCK) */}
+                  {stage === 'aftershock_surge' && (
+                    <div className="bg-[#12080A] border border-red-500 p-6 shadow-[0_0_40px_rgba(255,51,75,0.3)] text-center animate-pulse">
+                      <div className="flex justify-between items-center border-b border-red-500/30 pb-2 mb-3">
+                        <span className="mono text-[8px] tracking-[0.24em] text-red-400 font-bold">EMERGENCY: AFTERSHOCK SURGE</span>
+                        <span className="mono text-[11px] font-bold text-[#FFC857]">{aftershockTimer}s</span>
+                      </div>
+
+                      <div className="serif text-[22px] text-[#E8E6E1] mb-1">
+                        SECONDARY GIRDER: {activeSeed.aftershockFormula}
+                      </div>
+                      <p className="mono text-[7.5px] text-red-200/80 mb-4">
+                        Tension shifted to x = {activeSeed.targetX}. Crunch {activeSeed.aftershockFormula} at x = {activeSeed.targetX} on paper now!
+                      </p>
+
+                      <div className="w-full h-11 border border-red-500 bg-[#07090E] flex items-center justify-between px-4 mb-3">
+                        <span className="text-[7.5px] text-red-400/50 tracking-[0.2em]">SECONDARY PIN:</span>
+                        <span className="text-[17px] font-bold text-red-400 tracking-[0.18em]">
+                          {tumblerInput || "—.————"}
+                        </span>
+                      </div>
+
+                      {/* GATE 04 · the secondary pin. Same mechanical tumbler —
+                          four decimals, dialled by hand, under the clock. */}
+                      <div className="grid grid-cols-4 gap-1.5 w-full">
+                        {["7", "8", "9", "CLR", "4", "5", "6", ".", "1", "2", "3", "0"].map((k) => (
+                          <button
+                            key={`pin-${k}`}
+                            onClick={() => {
+                              audio.playClick();
+                              if (k === "CLR") {
+                                setTumblerInput("");
+                                return;
+                              }
+                              setTumblerInput((prev) => {
+                                if (k === "." && prev.includes(".")) return prev;
+                                const parts = prev.split(".");
+                                if (parts[1] && parts[1].length >= 4) return prev;
+                                return prev + k;
+                              });
+                            }}
+                            className={`h-9 border mono text-[11px] tracking-[0.06em] transition-colors ${
+                              k === "CLR" || k === "."
+                                ? "border-red-500/60 text-red-300 hover:bg-red-500/10"
+                                : "border-red-500/40 bg-[#07090E] text-[#E8E6E1] hover:border-red-400"
+                            }`}
+                          >
+                            {k}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const expected = Number.parseFloat(activeSeed.aftershockAnswer);
+                          const parsed = Number.parseFloat(tumblerInput);
+                          if (Number.isFinite(parsed) && Math.abs(parsed - expected) < 0.00005) {
+                            audio.playFuse();
+                            setShearStress(0.08); // STABILIZED!
+                            setStage('fault_complete');
+                            setDialogue({
+                              speaker: "SAGE",
+                              text: "Both welds fused. Shear down to eight. Not elegant — but the span is still standing, and that is the only metric that survived."
+                            });
+                          } else {
+                            handleFailure("Secondary pin failed! Check your calculation for " + activeSeed.aftershockFormula + " at x = " + activeSeed.targetX + ".");
+                          }
+                        }}
+                        className="mt-3 w-full py-2.5 border border-red-500 bg-red-500/20 mono text-[9px] tracking-[0.24em] text-red-300 font-bold hover:bg-red-500/30 transition-all"
+                      >
+                        SLAM SECONDARY STABILIZATION PIN
+                      </button>
+                    </div>
+                  )}
+
+                  {/* FAULT 01 NEUTRALIZED (ROADMAP ADVANCEMENT) */}
+                  {stage === 'fault_complete' && (
+                    <div className="bg-[#0A0C14] border border-[#FFC857] p-8 text-left shadow-[0_0_50px_rgba(255,200,87,0.15)]">
+                      <div className="mono text-[8px] text-[#FFC857] tracking-[0.24em]">
+                        FAULT 01 NEUTRALIZED
+                      </div>
+                      <div className="mt-3 border-t border-[#FFC857]/20 pt-3 mono text-[8px] text-[#E8E6E1]/60 tracking-[0.18em] leading-loose">
+                        PRIMARY HOLE WELDED<br />
+                        AFTERSHOCK SURGE CAPPED<br />
+                        <span className="text-[#00E5FF]">LOADPATH RE-ROUTED → F2</span>
+                      </div>
+                      <p className="mono text-[7.5px] text-[#E8E6E1]/50 mt-4 leading-relaxed">
+                        The removable discontinuity at x = {activeSeed.targetX} is permanently fused. Crosswinds are building downstream...
+                      </p>
+                      <button
+                        onClick={() => {
+                          // Advance into Fault 02 rather than leaving the sector.
+                          setTrial(2);
+                          setSeedIdx(0);
+                          setConjugateApplied(false);
+                          setTumblerInput("");
+                          conjProgress.current = 0;
+                          setShearStress(0.65); // 65 kN/m² crosswind
+                          setStrikeCount(0);
+                          setStage('radical_brief');
+                          setDialogue({
+                            speaker: "SAGE",
+                            text: "Polynomial factoring won't work on a radical. Apply the conjugate beam to force a difference of squares. Calculator ready."
+                          });
+                          if (onShowToast) onShowToast("Fault 02 armed: The Radical Conjugate Laser.");
+                        }}
+                        className="mt-6 border border-[#FFC857] bg-[#FFC857]/15 py-3 px-6 mono text-[9px] tracking-[0.22em] text-[#FFC857] font-bold hover:bg-[#FFC857]/30 transition-all w-full"
+                      >
+                        PROCEED DOWN THE SKYBRIDGE →
+                      </button>
+                    </div>
+                  )}
+
+                </div>
+              </div>
+            )}
+
+            {/* =====================================================================
+                FAULT 02 · THE RADICAL CONJUGATE LASER
+               ===================================================================== */}
+            {(stage === 'radical_brief' || stage === 'radical_crunch' || stage === 'radical_complete') && (
+              <div className="w-full flex flex-col items-center">
+
+                <div className="relative w-full h-56 md:h-72 border border-[#E8E6E1]/10 overflow-hidden">
+                  <MFSkybridgeCanvas
+                    shear={shearStress}
+                    aftershock={false}
+                    severed={conjugateApplied}
+                    welded={stage === 'radical_complete'}
+                    seed={activeRadical}
+                    fractureX={500 + activeRadical.fractureOffset * 120}
+                  />
+                </div>
+
+                <div className="w-full max-w-xl mt-4">
+                  {/* GATE 01 · BRIEF + CONJUGATE BEAM */}
+                  {stage === 'radical_brief' && (
+                    <div className="bg-[#0A0C14] border border-[#00E5FF]/30 p-6 text-center shadow-xl">
+                      <div className="mono text-[7px] tracking-[0.24em] text-[#00E5FF] mb-1">
+                        FAULT 02 // RADICAL SINGULARITY DETECTED
+                      </div>
+                      <div className="serif text-[19px] text-[#E8E6E1] mb-1">
+                        lim (x→{activeRadical.targetX}) [ {activeRadical.formula} ]
+                      </div>
+                      <p className="mono text-[7.5px] text-[#E8E6E1]/60 mb-5 leading-relaxed">
+                        Substitution returns 0/0 again, but there is nothing to factor. Press and hold the core to charge the beam: multiply numerator
+                        and denominator by the conjugate <span className="text-[#00E5FF]">{activeRadical.conjugate}</span> to force a difference of squares.
+                      </p>
+
+                      <MFConjugateBeam
+                        seed={activeRadical}
+                        armed={true}
+                        applied={conjugateApplied}
+                        progress={conjProgress}
+                        onApply={() => {
+                          audio.playSlice();
+                          setConjugateApplied(true);
+                          setDialogue({
+                            speaker: "SAGE",
+                            text: "Conjugate applied. Numerator collapses to " + activeRadical.numeratorAfter + " — the root cancels cleanly. Now the arithmetic: 1 / (2 × " + activeRadical.c + ")."
+                          });
+                          setTimeout(() => setStage('radical_crunch'), 800);
+                        }}
+                        onMiss={() => {
+                          handleFailure("Charge released early — the beam collapsed before the radical. Hold until the beam drives clean through.");
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  {/* GATE 02 · PRECISION TUMBLER · 1 / (2c) */}
+                  {stage === 'radical_crunch' && (
+                    <div className="bg-[#0A0C14] border border-[#FFC857]/40 p-6 shadow-xl text-center">
+                      <div className="mono text-[7.5px] tracking-[0.2em] text-[#FFC857] mb-1">
+                        CONJUGATE APPLIED // PRECISION TUMBLER
+                      </div>
+                      <div className="serif text-[18px] text-[#E8E6E1] mb-1">{activeRadical.simplified}</div>
+                      <p className="mono text-[7.5px] text-[#E8E6E1]/60 mb-4">
+                        Crunch 1 / (2 × {activeRadical.c}) on paper. Dial the four-decimal limit height:
+                      </p>
+
+                      <div className="w-full h-11 border border-[#FFC857] bg-[#07090E] flex items-center justify-between px-4 mb-3">
+                        <span className="text-[7.5px] text-[#FFC857]/40 tracking-[0.2em]">LIMIT HEIGHT:</span>
+                        <span className="text-[17px] font-bold text-[#FFC857] tracking-[0.18em]">
+                          {tumblerInput || "—.————"}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-4 gap-1.5 w-full">
+                        {["7", "8", "9", "CLR", "4", "5", "6", ".", "1", "2", "3", "0"].map((k) => (
+                          <button
+                            key={`rad-${k}`}
+                            onClick={() => {
+                              audio.playClick();
+                              if (k === "CLR") {
+                                setTumblerInput("");
+                                return;
+                              }
+                              setTumblerInput((prev) => {
+                                if (k === "." && prev.includes(".")) return prev;
+                                const parts = prev.split(".");
+                                if (parts[1] && parts[1].length >= 4) return prev;
+                                return prev + k;
+                              });
+                            }}
+                            className={`h-9 border mono text-[11px] tracking-[0.06em] transition-colors ${
+                              k === "CLR" || k === "."
+                                ? "border-[#FFC857]/40 text-[#FFC857] hover:bg-[#FFC857]/10"
+                                : "border-[#E8E6E1]/20 bg-[#07090E] text-[#E8E6E1] hover:border-[#FFC857]"
+                            }`}
+                          >
+                            {k}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          const parsed = Number.parseFloat(tumblerInput);
+                          if (Number.isFinite(parsed) && Math.abs(parsed - activeRadical.answer) < 0.00005) {
+                            audio.playFuse();
+                            setShearStress(0.08);
+                            setStage('radical_complete');
+                            setDialogue({
+                              speaker: "SAGE",
+                              text: "Correct to four decimals. The conjugate laser did in one stroke what factoring never could. Fault 02 is fused."
+                            });
+                            if (onShowToast) onShowToast("Fault 02 fused at " + activeRadical.answer.toFixed(4) + ".");
+                          } else {
+                            handleFailure(
+                              "Precision failure. The limit is 1 / (2 × " + activeRadical.c + ") — one divided by " + (2 * activeRadical.c) + "."
+                            );
+                          }
+                        }}
+                        className="mt-3 w-full py-2.5 border border-[#FFC857] bg-[#FFC857]/15 mono text-[8.5px] tracking-[0.2em] text-[#FFC857] font-bold hover:bg-[#FFC857]/30 transition-all"
+                      >
+                        LOCK CONJUGATE READOUT
+                      </button>
+                    </div>
+                  )}
+
+                  {/* FAULT 02 NEUTRALIZED */}
+                  {stage === 'radical_complete' && (
+                    <div className="bg-[#0A0C14] border border-[#FFC857] p-8 text-left shadow-[0_0_50px_rgba(255,200,87,0.15)]">
+                      <div className="mono text-[8px] text-[#FFC857] tracking-[0.24em]">
+                        FAULT 02 NEUTRALIZED
+                      </div>
+                      <div className="mt-3 border-t border-[#FFC857]/20 pt-3 mono text-[8px] text-[#E8E6E1]/60 tracking-[0.18em] leading-loose">
+                        RADICAL CLEARED<br />
+                        CONJUGATE FUSED<br />
+                        <span className="text-[#00E5FF]">SPAN CARRYING LOAD // F3 BERTH OPEN</span>
+                      </div>
+                      <p className="mono text-[7.5px] text-[#E8E6E1]/50 mt-4 leading-relaxed">
+                        The radical singularity at x = {activeRadical.targetX} reads {activeRadical.answer.toFixed(4)}.
+                        Crosswinds are settling on the downstream span.
+                      </p>
+                      <button
+                        onClick={() => {
+                          if (onShowToast) onShowToast("Fault 02 complete. Returning to the Roadmap.");
+                          setTimeout(() => onExitToRoadmap(), 1200);
+                        }}
+                        className="mt-6 border border-[#FFC857] bg-[#FFC857]/15 py-3 px-6 mono text-[9px] tracking-[0.22em] text-[#FFC857] font-bold hover:bg-[#FFC857]/30 transition-all w-full"
+                      >
+                        RETURN TO ROADMAP →
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </main>
+
+          {/* SAGE COGNITIVE TRANSMITTER (BOTTOM CENTER) */}
+          <footer className="relative z-20 w-full max-w-xl mx-auto px-4 pb-4">
+            <div className={`p-3.5 border backdrop-blur-md shadow-2xl transition-all ${
+              dialogue.speaker === 'ARCHIVIST' 
+                ? 'bg-[#150F14] border-red-500/80 text-red-200' 
+                : 'bg-[#0A0C14]/90 border-[#00E5FF]/30 text-[#E8E6E1]'
+            }`}>
+              <div className="flex items-center justify-between border-b border-current/20 pb-1 mb-1.5">
+                <span className="mono text-[7px] tracking-[0.24em] font-medium text-[#00E5FF]">
+                  {dialogue.speaker === 'ARCHIVIST' ? 'ARCHIVIST // RESTRICTED TAKEOVER' : 'SAGE // NEURAL TRANSMISSION'}
+                </span>
+                <span className="mono text-[6.5px] tracking-[0.14em] opacity-40">
+                  {dialogue.speaker === 'ARCHIVIST' ? 'STRIKE 3' : 'LIVE'}
+                </span>
+              </div>
+              <div className="serif italic text-[12px] md:text-[13px] leading-snug">
+                "{dialogue.text}"
+              </div>
+            </div>
+          </footer>
+
+          {/* ARCHIVIST 3-STRIKE LOCKOUT OVERLAY */}
+          {archivistLock && (
+            <div className="fixed inset-0 z-50 bg-[#07090E]/95 backdrop-blur-md flex items-center justify-center p-6">
+              <div className="border border-red-500 bg-[#0A0C14] p-8 max-w-sm w-full text-center shadow-2xl">
+                <div className="mono text-[7.5px] tracking-[0.28em] text-red-400 mb-2">ARCHIVE CODEX // PENALTY AUDIT</div>
+                <h3 className="serif text-[18px] text-[#E8E6E1] mb-3">DO NOT GUESS AGAIN.</h3>
+                <div className="border border-[#E8E6E1]/15 bg-[#07090E] p-4 text-left mono text-[8px] text-[#00E5FF] space-y-1.5">
+                  <div>1. CANCEL: (x - a) root must be completely severed.</div>
+                  <div>2. REMAINDER: Evaluate linear remainder y = x + a.</div>
+                  <div>3. AFTERSHOCK: Downstream load shifts to secondary girder.</div>
+                </div>
+                <div className="mono text-[7px] text-[#E8E6E1]/40 mt-4">SEED MUTATED // RESUMING IN 4s...</div>
+              </div>
+            </div>
+          )}
+
+        </div>
+      );
+    }
+
+    // Boundary note: React.memo is resolved off React (no destructuring above),
+    // so the Atelier is pinned against <CitadelEngine>'s re-renders. That keeps
+    // the intro <video> mounted — and playing — while a toast fades out.
+    const AtelierNode = React.memo(AtelierScreen);
+
+    // =======================================================================
+    // MASTER CONTROLLER: CITADEL ENGINE
+    // =======================================================================
+    function CitadelEngine() {
+      const [currentScreen, setCurrentScreen] = useState('gates');
+      const [showIntro, setShowIntro] = useState(false);
+      const [toastMessage, setToastMessage] = useState(null);
+      // Mirrors the Atelier's "Ambient Acoustics" switch so the intro knows
+      // whether the apprentice asked for silence.
+      const [soundMuted, setSoundMuted] = useState(false);
+
+      const triggerToast = (msg) => {
+        setToastMessage(msg);
+        setTimeout(() => setToastMessage(null), 3200);
+      };
+
+      const handleEnrolSuccess = () => {
+        setCurrentScreen('atelier');
+        setShowIntro(true); // Triggers real 34s R2 Video Modal
+      };
+
+      // Stable callbacks: <AtelierNode> is memoised, so new identities here
+      // would re-render it (and remount the video) on every toast tick.
+      const openRoadmap = useCallback(() => setCurrentScreen('roadmap'), []);
+      const logout = useCallback(() => setCurrentScreen('gates'), []);
+      const replayIntro = useCallback(() => setShowIntro(true), []);
+      const dismissIntro = useCallback(() => setShowIntro(false), []);
+
+      return (
+        <div className="relative w-full min-h-screen bg-[#07090E]">
+          {currentScreen === 'gates' && (
+            <GatesScreen
+              onEnterForge={() => setCurrentScreen('enrolment')}
+              onShowToast={triggerToast}
+            />
+          )}
+
+          {currentScreen === 'enrolment' && (
+            <EnrolmentScreen
+              onBackToGates={() => setCurrentScreen('gates')}
+              onSuccess={handleEnrolSuccess}
+              onShowToast={triggerToast}
+            />
+          )}
+
+          {currentScreen === 'atelier' && (
+            <AtelierNode
+              onOpenRoadmap={openRoadmap}
+              onLogout={logout}
+              onReplayIntro={replayIntro}
+              onSoundMutedChange={setSoundMuted}
+            />
+          )}
+
+          {currentScreen === 'roadmap' && (
+            <RoadmapScreen
+              onBackToAtelier={() => setCurrentScreen('atelier')}
+              onEnterMindForge={() => setCurrentScreen('mindforge')}
+            />
+          )}
+
+          {currentScreen === 'mindforge' && (
+            <MindForgeScreen
+              onExitToRoadmap={() => setCurrentScreen('roadmap')}
+              onShowToast={triggerToast}
+            />
+          )}
+
+          {/* Toast Container */}
+          {toastMessage && (
+            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+              <div className="border border-[#FFC857]/40 bg-[#07090E]/95 px-5 py-2.5 shadow-2xl backdrop-blur-md flex items-center gap-2.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#FFC857] animate-pulse" />
+                <span className="mono text-[8.5px] tracking-[0.16em] text-[#E8E6E1]">{toastMessage}</span>
+              </div>
+            </div>
+          )}
+
+          {/* 34s Universal Intro Modal (R2 Stream Player Slot).
+              allowAudio: the intro is only silent when the Atelier's
+              "Ambient Acoustics" is explicitly set to MUTED. */}
+          {showIntro && (
+            <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center p-0 md:p-6">
+              <div className="relative w-full h-full md:h-auto md:max-w-[420px] md:aspect-[9/16] bg-black flex flex-col justify-between border-0 md:border md:border-[#E8E6E1]/20 overflow-hidden">
+                <VideoPlayer
+                  src={R2_INTRO_URL}
+                  allowAudio={currentScreen !== 'atelier' || !soundMuted}
+                  onEnded={dismissIntro}
+                  onSkip={dismissIntro}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<CitadelEngine />);
+
+    // -----------------------------------------------------------------------
+    // ONLINE DIAGNOSTIC (console only): `await __forgeAudioReport()` tells you
+    // whether the R2 master really carries an audio track. On Windows the
+    // byte-range read works too, so the result is decisive for this file.
+    // -----------------------------------------------------------------------
+    window.__forgeAudioReport = async function (url) {
+      const src = url || R2_INTRO_URL;
+      const report = { src, canPlayTypeMp4Aac: "", webkitAudioDecodedByteCount: 0, rangeScan: "n/a" };
+      const node = document.createElement("video");
+      node.muted = true;
+      node.preload = "auto";
+      report.canPlayTypeMp4Aac = node.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"') || "(none)";
+
+      if (/safari/i.test(navigator.userAgent) && !/chrome|chromium|edg/i.test(navigator.userAgent)) {
+        // WebKit: decode a tiny slice and read the audio byte counter.
+        node.src = src;
+        await new Promise((resolve) => {
+          const done = () => resolve();
+          node.addEventListener("loadeddata", done, { once: true });
+          node.addEventListener("error", done, { once: true });
+          setTimeout(done, 6000);
+        });
+        report.webkitAudioDecodedByteCount = node.webkitAudioDecodedByteCount;
+      } else {
+        // MP4 layout: the `moov` box holds one `trak` per stream, and an audio
+        // trak always contains an `smhd` (sound media header) and `mp4a`.
+        try {
+          const res = await fetch(src);
+          const buffer = new Uint8Array(await res.arrayBuffer());
+          const text = new TextDecoder("latin1").decode(buffer);
+          const traks = (text.match(/trak/g) || []).length;
+          const handlerTypes = (text.match(/(vide|soun)/g) || []);
+          report.rangeScan = {
+            bytes: buffer.length,
+            traks,
+            handlerTypes,
+            hasSmhd: text.includes("smhd"),
+            hasMp4a: text.includes("mp4a"),
+            hasEsds: text.includes("esds"),
+            hasSounHandler: text.includes("soun"),
+            verdict: text.includes("smhd") && text.includes("mp4a")
+              ? "AUDIO TRACK PRESENT"
+              : "NO AUDIO TRACK — re-encode the master with -c:a aac"
+          };
+        } catch (err) {
+          report.rangeScan = "fetch failed: " + err.message;
+        }
+      }
+      console.table(report);
+      return report;
+    };
+  </script>
+</body>
+
+</html>

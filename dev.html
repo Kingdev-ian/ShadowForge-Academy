@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ShadowForge Academy — Citadel Engine (Vite)</title>
+
+  <!--
+    VITE ENTRY FOR src/  ·  "dev.html"
+    --------------------------------------------------------------------
+    This document mounts src/main.jsx -> src/App.jsx: the componentised
+    MindForge (MindForgeActOne.jsx), not the legacy CDN MindForgeScreen.
+    It deliberately mirrors index.html's surface (fonts, palette, the
+    shared synth body) so the two can be compared side by side during the
+    parity gate. index.html itself is NOT modified by this file.
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=JetBrains+Mono:wght@300;400;500;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --obsidian: #07090E;
+      --limestone: #E8E6E1;
+      --amber: #FFC857;
+      --cyan: #00E5FF;
+      --danger: #FF334B;
+    }
+
+    * {
+      -webkit-font-smoothing: antialiased;
+      box-sizing: border-box;
+      touch-action: manipulation;
+    }
+
+    body,
+    html {
+      background: var(--obsidian);
+      color: var(--limestone);
+      font-family: 'JetBrains Mono', monospace;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <noscript style="color:#E8E6E1;font-family:monospace;padding:24px;display:block;">
+    This app requires JavaScript.
+  </noscript>
+
+  <!--
+    SHARED PROCEDURAL SYNTHESIZER SOURCE — kept byte-identical to the block of
+    the same id in index.html. src/lib/forge-audio.js reads this element's text
+    at runtime and compiles it into the ForgeAudio class, so the Vite app and
+    the legacy CDN document share ONE synth implementation: no audio files, no
+    duplicated behaviour, 0ms Web Audio latency in both places.
+
+    If you add a cue (e.g. the Fault 03 torsion hum), add it HERE and in
+    index.html's copy, plus FALLBACK_SRC in src/lib/forge-audio.js.
+  -->
+  <script id="citadel-audio-src" type="text/plain">
+    {
+      constructor() { this.ctx = null; this.master = null; }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContext) return null;
+          this.ctx = new AudioContext();
+          this.master = this.ctx.createGain();
+          this.master.gain.value = 1;
+          this.master.connect(this.ctx.destination);
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        return this.ctx;
+      }
+      // Shared envelope helper: one oscillator + gain ramp -> master bus.
+      tone(type, from, to, dur, peak, delay) {
+        const ctx = this.init();
+        if (!ctx) return;
+        const t0 = ctx.currentTime + (delay || 0);
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(from, t0);
+        if (to !== from) osc.frequency.exponentialRampToValueAtTime(Math.max(to, 1), t0 + dur);
+        gain.gain.setValueAtTime(peak, t0);
+        gain.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+        osc.connect(gain);
+        gain.connect(this.master || ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + dur + 0.02);
+      }
+      // Filtered noise burst — used for pneumatics and metal-on-metal harmonics.
+      noise(dur, peak, filterType, freqFrom, freqTo, delay) {
+        const ctx = this.init();
+        if (!ctx) return;
+        const t0 = ctx.currentTime + (delay || 0);
+        const frames = Math.max(1, Math.floor(ctx.sampleRate * dur));
+        const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < frames; i++) data[i] = Math.random() * 2 - 1;
+        const src = ctx.createBufferSource();
+        src.buffer = buffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = filterType || 'bandpass';
+        filter.frequency.setValueAtTime(freqFrom, t0);
+        filter.frequency.exponentialRampToValueAtTime(Math.max(freqTo, 20), t0 + dur);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(peak, t0);
+        gain.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+        src.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.master || ctx.destination);
+        src.start(t0);
+        src.stop(t0 + dur + 0.02);
+      }
+      // AIR-LOCK: pneumatic hatch release (saw sweep + escaping air).
+      playPneumatic() {
+        this.tone('sawtooth', 130, 30, 0.45, 0.3);
+        this.noise(0.7, 0.16, 'highpass', 1800, 400, 0.02);
+        this.tone('square', 62, 26, 0.35, 0.1, 0.04);
+      }
+      // BLADE: monomolecular severing slice.
+      playSlice() {
+        this.tone('triangle', 1400, 160, 0.2, 0.25);
+        this.noise(0.22, 0.1, 'highpass', 5200, 1400, 0);
+        this.tone('sine', 420, 90, 0.3, 0.12, 0.05);
+      }
+      playClick() {
+        this.tone('sine', 900, 900, 0.04, 0.06);
+      }
+      // ERROR: two-tone alarm.
+      playAlarm() {
+        this.tone('square', 100, 100, 0.25, 0.2);
+        this.tone('square', 74, 74, 0.28, 0.16, 0.14);
+      }
+      // SPARK: the gold 1px line "lighting the forge".
+      playSpark() {
+        this.tone('sine', 2400, 520, 0.22, 0.07);
+        this.noise(0.18, 0.05, 'bandpass', 3200, 900, 0);
+      }
+      // SUCCESS: amber weld resonance.
+      playWeld() {
+        this.tone('sine', 196, 196, 1.1, 0.16);
+        this.tone('sine', 294, 294, 0.9, 0.1, 0.03);
+        this.tone('triangle', 587, 587, 0.6, 0.05, 0.06);
+        this.noise(0.5, 0.06, 'bandpass', 2400, 600, 0);
+      }
+      // SEAL: air-lock closing / node reset.
+      playSeal() {
+        this.noise(0.55, 0.14, 'lowpass', 900, 120, 0);
+        this.tone('sawtooth', 90, 18, 0.6, 0.18, 0.02);
+      }
+      // LOCKOUT: Archivist denial sting.
+      playLockout() {
+        this.tone('square', 220, 200, 0.18, 0.14);
+        this.tone('square', 110, 100, 0.55, 0.18, 0.2);
+        this.noise(0.9, 0.07, 'lowpass', 600, 80, 0.1);
+      }
+      // SURGE: the 15s aftershock — sub-bass drop + shearing metal.
+      playSurge() {
+        this.tone('sawtooth', 180, 28, 0.9, 0.28);
+        this.tone('square', 58, 22, 1.2, 0.16, 0.06);
+        this.noise(1.0, 0.14, 'lowpass', 1200, 90, 0);
+      }
+      // FUSE: molten-gold weld on the secondary girder (fault neutralised).
+      playFuse() {
+        this.tone('sine', 147, 196, 0.9, 0.16);
+        this.tone('triangle', 392, 392, 0.7, 0.07, 0.04);
+        this.noise(0.7, 0.08, 'bandpass', 2800, 700, 0);
+        this.playSpark();
+      }
+      stopAll() {}
+    }
+  </script>
+
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>
